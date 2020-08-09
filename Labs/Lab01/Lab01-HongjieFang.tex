@@ -1,0 +1,406 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{ctex}
+\usepackage{amsmath,amscd,amsbsy,amssymb,latexsym,url,bm,amsthm}
+\usepackage{epsfig,graphicx,subfigure}
+\usepackage{enumitem,balance}
+\usepackage{wrapfig}
+\usepackage{mathrsfs,euscript}
+\usepackage[usenames]{xcolor}
+\usepackage{hyperref}
+\usepackage[vlined,ruled,linesnumbered]{algorithm2e}
+\hypersetup{colorlinks=true,linkcolor=black}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{exercise}{Exercise}
+\newtheorem*{solution}{Solution}
+\newtheorem{definition}{Definition}
+\theoremstyle{definition}
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\newcommand{\postscript}[2]
+ {\setlength{\epsfxsize}{#2\hsize}
+  \centerline{\epsfbox{#1}}}
+
+\renewcommand{\baselinestretch}{1.0}
+
+\setlength{\oddsidemargin}{-0.365in}
+\setlength{\evensidemargin}{-0.365in}
+\setlength{\topmargin}{-0.3in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\textheight}{10.1in}
+\setlength{\textwidth}{7in}
+\makeatletter \renewenvironment{proof}[1][Proof] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+\makeatletter
+\renewenvironment{solution}[1][Solution] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+
+\begin{document}
+\noindent
+
+%========================================================================
+\noindent\framebox[\linewidth]{\shortstack[c]{
+\Large{\textbf{Lab01-AlgorithmAnalysis}}\vspace{1mm}\\
+CS214-Algorithm and Complexity, Xiaofeng Gao, Spring 2020.}}
+\begin{center}
+\footnotesize{\color{red}$*$ If there is any problem, please contact TA Shuodian Yu.}
+
+% Please write down your name, student id and email.
+\footnotesize{\color{blue}$*$ Name: Hongjie Fang  \quad Student ID: 518030910150 \quad Email: galaxies@sjtu.edu.cn}
+\end{center}
+
+\begin{enumerate}
+    \item
+    Please analyze the time complexity of Alg.~\ref{Alg-PSUM} with brief explanations.
+
+    \begin{minipage}[t]{0.8\textwidth}
+    \begin{algorithm}[H]
+        \caption{PSUM}\label{Alg-PSUM}
+        \KwIn{$n=k^2$, $k$ is a positive integer.}
+        \KwOut{$\sum_{i=1}^j i$ for each perfect square $j$ between 1 and $n$.}
+
+        \BlankLine
+
+        $k \leftarrow \sqrt{n}$\;
+
+        \For{$j\leftarrow 1$ {\bf to} $k$}{
+            $sum[j]\leftarrow 0$\;
+            \For{$i \leftarrow 1$ {\bf to} $j^2$}{
+                $sum[j]\leftarrow sum[j]+i$\;
+            }
+        }
+
+        {\bf return} $sum[1\cdots k]$\;
+    \end{algorithm}
+    \end{minipage}
+
+    \begin{solution}
+        Assume that $k = \sqrt{n}$. The outer \textbf{for} is executed $k$ times, and the inner \textbf{for} is executed $1^2, 2^2, ..., k^2$ times. Thus, total iteration times $T(n)$ can be calculated as follows.
+
+        \begin{displaymath}
+            T(n) = \sum_{j = 1}^k \sum_{i=1}^{j^2} 1 = \sum_{j=1}^{\sqrt{n}} j^2 = \frac{1}{6}\sqrt{n}(\sqrt{n} + 1)(2\sqrt{n} + 1) = \Theta(n ^ {1.5})
+        \end{displaymath}
+
+        As a result, the time complexity of Alg.~\ref{Alg-PSUM} is $\Theta(n^{1.5})$.
+    \end{solution}
+
+    \item
+    Analyze the \textbf{average} time complexity of QuickSort in Alg.~\ref{Alg_Quick}.
+
+    \begin{minipage}[t]{0.8\textwidth}
+    \begin{algorithm}[H]
+      \KwIn{An array $A[1,\cdots,n]$}
+      \KwOut{$A[1,\cdots,n]$ sorted nonincreasingly}
+
+      \BlankLine
+      \caption{QuickSort}\label{Alg_Quick}
+
+      %\If{$n \le 1$}{
+      %  \Return\;
+      %}
+
+      $pivot \leftarrow A[n]$; $i \leftarrow 1$\;
+      \For{$j \leftarrow 1$ \KwTo $n-1$}{
+        \If{$A[j] < pivot$}{
+          swap $A[i]$ and $A[j]$\;
+          $i \leftarrow i+1$\;
+        }
+      }
+
+      swap $A[i]$ and $A[n]$\;
+      \lIf{$i>1$}{$\operatorname{QuickSort}(A[1,\cdots,i-1])$}
+
+      \lIf{$i<n$}{$\operatorname{QuickSort}(A[i+1,\cdots,n])$}
+    \end{algorithm}
+    \end{minipage}
+
+    \begin{solution}
+        We define $T(n)$ as the \textbf{average} number of comparisons of sorting $n$ elements $A[1,\dots,n]$ with the QuickSort Algorithm (Alg.~\ref{Alg_Quick}). Obviously we have $T(0) = 0$, since we don't have to sort at all. Without loss of generality, we make the following assumptions:
+
+        \begin{itemize}
+            \item $A[1,\dots,n]$ contains the numbers $1$ through $n$.
+            \item All $n!$ permutations are equally likely.
+        \end{itemize}
+
+        With the assumptions above, we know that the the probabilities of all the elements to become the pivot (which is, to appear at place $A[n]$) are the same, which is,
+
+        \begin{equation}
+            Pr(x \mathrm{\ become\ pivot}) = \frac{1}{n} \quad (1 \leq x \leq n)
+            \label{eq:2.1}
+        \end{equation}
+
+        When $x$ is chosen to be a pivot, we use a \textbf{for} loop, which will make $(n-1)$ comparisons, to divide the elements into two groups: numbers which are smaller than $x$ and numbers which are greater than $x$. The two groups have $(x - 1)$ and $(n - x)$ elements respectively. Then we do the QuickSort Algorithm (Alg.~\ref{Alg_Quick}) to the two groups recursively, which means the average additional comparison times of $T(x-1)$ and $T(n-x)$. Hence,
+
+        \begin{equation}
+        \begin{aligned}
+            T(n) &= \sum_{x=1}^n Pr(x \mathrm{\ become\ pivot}) \cdot \left((n-1) + T(x-1) + T(n-x)\right) \\
+                 &= (n-1) + \frac{1}{n} \sum_{x=1}^n \left(T(x-1) + T(n-x)\right) \\
+                 &= (n-1) + \frac{2}{n} \sum_{x=0}^{n-1} T(x) \quad \quad (n \geq 1)
+        \end{aligned}
+        \label{eq:2.2}
+        \end{equation}
+
+        Let $S(n)$ be the prefix summation of sequence $\{T(0), T(1), \dots, T(n)\}$, which is,
+
+        \begin{displaymath}
+            S(n) = \sum_{x=0}^{n} T(x) \quad \quad  (n \geq 0)
+        \end{displaymath}
+
+        Combine Equation \eqref{eq:2.2} and the definition of $S(n)$ above together we can get:
+
+        \begin{displaymath}
+            S(n) = \frac{n+1}{2} \cdot \left(T(n+1) - n\right) \quad \quad (n \geq 0)
+        \end{displaymath}
+
+        Thus,
+
+        \begin{equation}
+        \begin{aligned}
+            T(n) &= S(n) - S(n-1) \\
+                 &= \frac{n+1}{2} \cdot \left(T(n+1) - n\right) - \frac{n}{2} \cdot \left(T(n) - (n-1)\right) \quad \quad &(n \geq 1)\\
+        \Longrightarrow \quad T(n+1) &= \frac{n+2}{n+1} \cdot T(n) + \frac{2n}{n+1} \quad \quad &(n \geq 1)
+        \end{aligned}
+        \label{eq:2.3}
+        \end{equation}
+
+        Solve the recursive equation \eqref{eq:2.3} we can get the general formula of $T(n)$ as follows.
+
+        \begin{equation}
+        T(n) = \left\{
+        \begin{aligned}
+            & 0 & \quad \quad (n = 0, 1) \\
+            & \frac{2(n-1)}{n} + 2(n+1)\sum_{i=1}^{n-1} \frac{i-1}{i(i+1)} & \quad \quad (n \geq 2)
+        \end{aligned}
+        \right.
+        \label{eq:2.4}
+        \end{equation}
+
+        With Equation \eqref{eq:2.4} we can obtain the following equation.
+
+        \begin{equation}
+        (n+1)H_{n-1} \leq T(n) \leq 2 + 2(n+1)H_{n-1}  \quad \quad (n \geq 2)
+        \end{equation}
+
+        where $H_n$ is the $n$-th harmonic number and $H_n \sim \log{n}$.
+
+        Therefore, the \textbf{average} time complexity of QuickSort Algorithm (Alg.~\ref{Alg_Quick}) is $T(n) = \Theta(n \log{n})$.
+    \end{solution}
+
+    \item
+    The BubbleSort mentioned in class can be improved by stopping in time if there are no swaps during an iteration. An indicator is used thereby to check whether the array is already sorted. Analyze the \textbf{average} and \textbf{best} time complexity of the improved BubbleSort in Alg.~\ref{Alg_Bubble}.
+
+    \begin{minipage}[t]{0.8\textwidth}
+    \begin{algorithm}[H]
+        \KwIn{An array $A[1,\dots,n]$}
+        \KwOut{$A[1,\dots,n]$ sorted nondecreasingly}
+
+        \BlankLine
+        \caption{BubbleSort}\label{Alg_Bubble}
+
+        $i\leftarrow 1$;$sorted\leftarrow false$\;
+
+        \While{$i\leq n-1$ \textbf{and not} $sorted$}{
+            $sorted\leftarrow true$\;
+            \For{$j\leftarrow n $ \textbf{downto} $i+1$}{
+                \If{$A[j]<A[j-1]$}{
+                    interchange $A[j]$ and $A[j-1]$\;
+                    $sorted\leftarrow false$\;
+                }
+            }
+            $i\leftarrow i+1$\;
+        }
+    \end{algorithm}
+    \end{minipage}
+
+    \begin{solution}
+        The \textbf{best} case of the improved BubbleSort Algorithm is that the initial array $A[1,\dots,n]$ is already sorted non-decreasingly. Under this circumstance, after a inner \textbf{for} loop the algorithm come to the conclusion that the array is already sorted, and then set flag $sorted$ to $true$ to complete the sorting process. Thus, total comparison time is $n - 1 = \Omega(n)$. Thus the \textbf{best} time complexity is $\Omega(n)$.
+
+        The \textbf{worst} case of the improved BubbleSort Algorithm is that the initial array $A[1,\dots,n]$ is in reverse order. In this situation, the other \textbf{while} loop will be executed $(n-1)$ times and the comparison times is $\sum_{i=1}^{n-1} (n-i) = \frac{n(n-1)}{2}$. Thus the \textbf{worst} time complexity is $O(n^2)$.
+
+        Then we discuss the \textbf{average} case of the improved BubbleSort. Without loss of generality, we make the following assumptions.
+
+        \begin{itemize}
+            \item $A[1,\dots,n]$ contains the numbers $1$ through $n$.
+            \item All $n!$ permutations are equally likely.
+        \end{itemize}
+
+        We also define some notations and names as follows.
+
+        \begin{itemize}
+        \item ``An inversion'': a pair of elements $(A[i], A[j])$ satisfying $A[i] > A[j]$ while $1 \leq i < j \leq n$.
+        \item $T(n)$: the \textbf{average number of comparisons} of sorting $n$ elements $A[1,\dots,n]$ with the method of improved BubbleSort Algorithm (Alg.~\ref{Alg_Bubble});
+        \item $S(n)$: the \textbf{average number of interchanges} of sorting $n$ elements $A[1,\dots,n]$ with the method of improved BubbleSort Algorithm (Alg.~\ref{Alg_Bubble});
+        \end{itemize}
+
+        Then we give the following useful lemmas.
+
+        \begin{center}
+        \begin{minipage}[t]{0.8 \textwidth}
+        \begin{lemma}
+            The number of interchanges in BubbleSort Algorithm (Alg.~\ref{Alg_Bubble}) equals to the number of inversions in the initial sequence $A[1,\dots,n]$.
+            \label{lemma1}
+        \end{lemma}
+        \begin{proof}
+            According to the algorithm, we only perform an interchange when we find a pair of adjacent elements which is also an inversion. After interchange, we only reduce the number of inversions by one (the pair $(A[j-1], A[j])$). Therefore, the number of interchanges equals to the number of inversions in the initial sequence.
+        \end{proof}
+        \end{minipage}
+
+        \begin{minipage}[t]{0.8 \textwidth}
+        \begin{lemma}
+            In BubbleSort Algorithm (Alg.~\ref{Alg_Bubble}), the average number of interchanges can't exceed the average number of comparisons, that is, $S(n) \leq T(n)$.
+            \label{lemma2}
+        \end{lemma}
+        \begin{proof}
+            Consider every situation of the sequence $A[1,\dots,n]$, an interchange only happens after a comparison in BubbleSort Algorithm (Alg.~\ref{Alg_Bubble}). So in every situation, the number of interchanges can not exceed the number of comparisons. Therefore, in average situation, the average number of interchanges can't exceed the average number of comparisons, that is, $S(n) \leq T(n)$.
+        \end{proof}
+        \end{minipage}
+
+        \begin{minipage}[t]{0.8 \textwidth}
+        \begin{lemma}
+            The average number of inversions in the initial sequence $A[1,\dots,n]$ is $\frac{n(n-1)}{4}$.
+            \label{lemma3}
+        \end{lemma}
+        \begin{proof}
+            With the assumptions above, $A[1,...,n]$ is a permutation of $1$ to $n$. Consider each pair of elements $(i, j)$ satisfying $1 \leq j < i \leq n$. Only when $i$ appears before $j$, the ordered-pair $(i, j)$ will become an inversion. The probability that $i$ appears before $j$ is equal to the probability that $j$ appears before $i$, hence they're both $50\%$. So every pair of elements $(i, j)$ satisfying the conditions above has $50\%$ chance to become an inversion. That means the average number of inversions in the initial sequence $s$ can be counted as follows:
+
+            \begin{equation}
+                s = \sum_{j=1}^{n-1} \sum_{i=j+1}^n \frac{1}{2} = \frac{n(n-1)}{4}
+                \label{eqlemma}
+            \end{equation}
+
+            With Equation \eqref{eqlemma}, obviously the lemma is correct.
+        \end{proof}
+        \end{minipage}
+        \end{center}
+
+        On one hand, With Lemma \ref{lemma1}, Lemma \ref{lemma2} and Lemma \ref{lemma3}, we know that $\frac{n(n-1)}{4} \leq T(n)$. On the other hand, the average number of comparisons can not exceed the number of comparisons in the \textbf{worst} case, which means $T(n) \leq \frac{n(n-1)}{2}$. Thus,
+
+        \begin{equation}
+            \frac{n(n-1)}{4} \leq T(n) \leq \frac{n(n-1)}{2}
+            \label{eqaverage}
+        \end{equation}
+
+        Equation \eqref{eqaverage} leads us to the answer: the \textbf{average} time complexity of the improved BubbleSort Algorithm (Alg.~\ref{Alg_Bubble}) is $T(n) = \Theta(n^2)$.
+
+        \textbf{Summary}: the time complexity of improved BubbleSort Algorithm (Alg.~\ref{Alg_Bubble}).
+        \begin{itemize}
+        \item \textbf{Best case}: $\Omega(n)$;
+        \item \textbf{Average case}: $\Theta(n^2)$;
+        \item \textbf{Worst case}: $O(n^2)$.
+        \end{itemize}
+    \end{solution}
+
+    \item
+
+    Rank the following functions by order of growth with brief explanations: that is, find an arrangement $g_1, g_2, \ldots , g_{15}$ of the functions $g_1 = \Omega(g_2), g_2 = \Omega(g_3), \ldots, g_{14} = \Omega(g_{15})$.  Partition your list into equivalence classes such that functions $f(n)$ and $g(n)$ are in the same class if and only if $f(n) = \Theta(g(n))$. Use symbols ``$=$'' and ``$\prec$'' to order these functions appropriately. Here $\log n$ stands for $\log_2 n$.
+    $$
+    \begin{array}{ccccc}
+        2^{\log n} \quad & \quad (\log n)^{\log n} \quad & \quad n^2 \quad & \quad n! \quad & \quad (n + 1)! \\
+        2^n \quad & \quad n^3 \quad & \quad \log^2 n \quad & \quad e^n \quad & \quad 2^{2^n} \\
+        \log\log n \quad & \quad n\cdot 2^n \quad & \quad n \quad & \quad \log n \quad & \quad 4^{\log n} \\
+    \end{array}
+    $$
+
+    \begin{solution}
+        We can draw the following conclusions.
+        \begin{itemize}
+        \item $\log{\log{n}} \prec \log{n}$, since
+            \begin{displaymath}
+            \begin{aligned}
+            & \quad \log{n} < n \quad & (n \geq 2, n \in \mathbb{N})\\
+            \Longrightarrow & \quad \log{\log{n}} < \log{n} \quad & (n \geq 2, n \in \mathbb{N})\\
+            \Longrightarrow & \quad \log{\log{n}} = o(\log{n})
+            \end{aligned}
+            \end{displaymath}
+        \item $\log{n} \prec \log^2{n}$, since
+            \begin{displaymath}
+            \lim_{n \rightarrow +\infty} \frac{\log{n}}{\log^2{n}} = \lim_{n \rightarrow +\infty} \frac{1}{\log{n}} = 0 \quad \Longrightarrow \quad \log{n} = o(\log^2{n})
+            \end{displaymath}
+        \item $\log^2{n} \prec n$, since
+            \begin{displaymath}
+            \lim_{n \rightarrow +\infty} \frac{\log^2{n}}{n} = 0 \quad \Longrightarrow \quad \log^2{n} = o(n)
+            \end{displaymath}
+        \item $n = 2^{\log{n}}$, since
+            \begin{displaymath}
+            2^{\log{n}} = n \quad \Longrightarrow \quad n = \Theta(2^{\log{n}})
+            \end{displaymath}
+        \item $n \prec n^2$, since
+            \begin{displaymath}
+            \lim_{n \rightarrow +\infty} \frac{n}{n^2} = \lim_{n \rightarrow +\infty} \frac{1}{n} = 0 \quad \Longrightarrow \quad n = o(n^2)
+            \end{displaymath}
+        \item $n^2 = 4^{\log{n}}$, since
+            \begin{displaymath}
+            4^{\log{n}} = 2^{2\log{n}} = 2^{\log(n^2)}=n^2 \quad \Longrightarrow \quad n^2 = \Theta(4^{\log{n}})
+            \end{displaymath}
+        \item $n^2 \prec n^3$, since
+            \begin{displaymath}
+            \lim_{n \rightarrow +\infty} \frac{n^2}{n^3} = \lim_{n \rightarrow +\infty} \frac{1}{n} = 0 \quad \Longrightarrow \quad n^2 = o(n^3)
+            \end{displaymath}
+        \item $n^3 \prec (\log{n})^{\log{n}}$, since
+            \begin{displaymath}
+            \begin{aligned}
+            & \quad \log{(n^3)} = 3\log{n} < \log{\log{n}} \cdot \log{n} = \log{\left((\log{n})^{\log{n}}\right)}\quad &(n > 256, n \in \mathbb{N})\\
+            \Longrightarrow & \quad n^3 < (\log{n})^{\log{n}} \quad &(n > 256, n \in \mathbb{N})\\
+            \Longrightarrow & \quad n^3 = o((\log{n})^{\log{n}})
+            \end{aligned}
+            \end{displaymath}
+        \item $(\log{n})^{\log{n}} \prec 2^n$, since
+            \begin{displaymath}
+            \begin{aligned}
+            & \quad \log{\left((\log{n})^{\log{n}}\right)} = \log{\log{n}} \cdot \log{n} < n = \log{(2^n)} \quad & (n > 2, n \in \mathbb{N}) \\
+            \Longrightarrow & \quad (\log{n})^{\log{n}} < 2^n \quad & (n > 2, n \in \mathbb{N}) \\
+            \Longrightarrow & \quad (\log{n})^{\log{n}} = o(2^n)
+            \end{aligned}
+            \end{displaymath}
+        \item $2^n \prec n \cdot 2^n$, since
+            \begin{displaymath}
+            \lim_{n \rightarrow +\infty} \frac{2^n}{n \cdot 2^n} = \lim_{n \rightarrow +\infty} \frac{1}{n} = 0 \quad \Longrightarrow \quad 2^n = o(n\cdot 2^n)
+            \end{displaymath}
+        \item $n\cdot 2^n \prec e^n$, since
+            \begin{displaymath}
+            \lim_{n \rightarrow +\infty} \frac{n\cdot 2^n}{e^n} = \lim_{n \rightarrow +\infty} n\cdot \left(\frac{2}{e}\right)^n = 0 \quad \Longrightarrow \quad n \cdot 2^n = o(e^n)
+            \end{displaymath}
+        \item $e^n \prec n!$, since
+            \begin{displaymath}
+            \begin{aligned}
+                & \quad 0 < \frac{e^n}{n!} = e \cdot \frac{e}{2} \cdot \prod_{i=3}^n \frac{e}{i} < \frac{e^2}{2} \cdot \left(\frac{e}{3}\right)^{n-3} \longrightarrow 0 \quad (n\rightarrow +\infty) \\
+                \Longrightarrow & \quad \lim_{n\rightarrow +\infty} \frac{e^n}{n!} = 0 \\
+                \Longrightarrow & \quad e^n = o(n!)
+            \end{aligned}
+            \end{displaymath}
+        \item $n! \prec (n+1)!$, since
+            \begin{displaymath}
+            \lim_{n \rightarrow +\infty} \frac{n!}{(n+1)!} = \lim_{n \rightarrow +\infty} \frac{1}{n+1} = 0 \quad \Longrightarrow \quad n! = o((n+1)!)
+            \end{displaymath}
+        \item $(n+1)! \prec 2^{2^n}$, since
+            \begin{displaymath}
+            \begin{aligned}
+            & \quad \log{(n+1)!} = \sum_{i=1}^{n+1} \log{i} < \sum_{i=1}^{n+1} i < (n+1)^2 < 2^n = \log{2^{2^n}} \quad (n > 10, n \in \mathbb{N})\\
+            \Longrightarrow & \quad (n+1)! = o(2^{2^n})
+            \end{aligned}
+            \end{displaymath}
+        \end{itemize}
+
+        As a result, we are able to derive the answer of the question, as formula \eqref{eq:3} shows.
+
+        \begin{equation}
+        \begin{aligned}
+                  & \ \ \log{\log{n}}   & \prec & \quad \log{n}    & \prec & \ \ \log^2{n} & \prec & \quad \quad \ \ n           &   =   & \quad 2^{\log{n}} \\
+            \prec & \quad \ \ \ n^2     &   =   & \ \ \ 4^{\log{n}}& \prec & \quad \ \ n^3 & \prec & \quad (\log{n})^{\log{n}}   & \prec & \quad 2^n  \\
+            \prec & \quad \ n \cdot 2^n & \prec & \quad \ \ e^n    & \prec & \quad \ \ n!  & \prec & \quad \ (n+1)!              & \prec & \quad 2^{2^n}
+        \end{aligned}
+        \label{eq:3}
+        \end{equation}
+    \end{solution}
+
+\end{enumerate}
+
+\vspace{20pt}
+
+\textbf{Remark:} You need to include your .pdf and .tex files in your uploaded .rar or .zip file.
+
+%========================================================================
+\end{document}

@@ -1,0 +1,496 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{ctex}
+\usepackage{amsmath,amscd,amsbsy,amssymb,latexsym,url,bm,amsthm}
+\usepackage{epsfig,graphicx,subfigure}
+\usepackage{enumitem,balance}
+\usepackage{wrapfig}
+\usepackage{mathrsfs,euscript}
+\usepackage[usenames]{xcolor}
+\usepackage{hyperref}
+\usepackage[vlined,ruled,linesnumbered]{algorithm2e}
+\hypersetup{colorlinks=true,linkcolor=black}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{exercise}{Exercise}
+\newtheorem*{solution}{Solution}
+\newtheorem{definition}{Definition}
+\theoremstyle{definition}
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\newcommand{\postscript}[2]
+ {\setlength{\epsfxsize}{#2\hsize}
+  \centerline{\epsfbox{#1}}}
+
+\renewcommand{\baselinestretch}{1.0}
+
+\setlength{\oddsidemargin}{-0.365in}
+\setlength{\evensidemargin}{-0.365in}
+\setlength{\topmargin}{-0.3in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\textheight}{10.1in}
+\setlength{\textwidth}{7in}
+\makeatletter \renewenvironment{proof}[1][Proof] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+\makeatletter
+\renewenvironment{solution}[1][Solution] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+
+\begin{document}
+
+\noindent
+
+%========================================================================
+\noindent\framebox[\linewidth]{\shortstack[c]{
+\Large{\textbf{Lab04-Matroid}}\vspace{1mm}\\
+CS214-Algorithm and Complexity, Xiaofeng Gao, Spring 2020.}}
+\begin{center}
+\footnotesize{\color{red}$*$ If there is any problem, please contact TA Yiming Liu.}
+
+% Please write down your name, student id and email.
+\footnotesize{\color{blue}$*$ Name:Hongjie Fang  \quad Student ID:518030910150 \quad Email: galaxies@sjtu.edu.cn}
+\end{center}
+
+\begin{enumerate}
+\item Give a directed graph $G=(V,E)$ whose edges have integer weights. Let $w(e)$ be the weight of edge $e\in E$. We are also given a constraint $f(u)\geq 0$ on the out-degree of each node $u\in V$. Our goal is to find a subset of edges with maximal weight, whose out-degree at any node is no greater than the constraint.
+	\begin{enumerate}
+	    \item Please define independent sets and prove that they form a matroid.
+	    \item Write an optimal greedy algorithm based on Greedy-MAX in the form of \emph{pseudo code}.
+	    \item Analyze the time complexity of your algorithm.
+	\end{enumerate}
+    \begin{solution} Here are the answers to the questions.
+    \begin{enumerate}
+    \item First we construct a edge set $E'$ based on edge set $E$, but we abandon the negative-weighted edges, that is,
+        \begin{displaymath}
+        E' = \{e \mid e \in E, w(e) \geq 0\}
+        \end{displaymath}
+        Then we define independent subsets and the collection of independent subsets as follows.
+        \begin{definition}
+        A subset $I \subseteq E'$ is independent if and only if for every node $u \in V$, the out-degree at node $u$ in edge set $I$ does not exceed the constraint $f(u)$, that is,
+        \begin{displaymath}
+        \left|\{(u, v) \mid v \in V, (u, v) \in I \}\right| \leq f(u) \quad \quad (\forall u\in V)
+        \end{displaymath}
+        And we define $\mathbf{C}$ as the collection of all independent subsets, that is,
+        \begin{displaymath}
+        \mathbf{C} = \{I \mid I \subseteq E', I \mathrm{\ is\ independent}  \}
+        \end{displaymath}
+        We also define $M$ as an independent system constructed by edge set $E'$ and $\mathbf{C}$, that is,
+        \begin{displaymath}
+        M = (E', \mathbf{C})
+        \end{displaymath}
+        \end{definition}
+        \begin{lemma}[Hereditary]\label{lemma1}
+        Collection $\mathbf{C}$ is hereditary.
+        \end{lemma}
+        \begin{proof}
+        $\forall B \in \mathbf{C}$, we know that $B$ is an independent subset, that is, for every node $u \in V$, the out-degree at node $u$ in edge set $B$ does not exceed the constraint $f(u)$. $\forall A \subseteq B$, for every node $u\in V$, the out-degree at node $u$ in edge set $A$ is no more than that in edge set $B$, so it does not exceed the constraint $f(u)$. Therefore, $A \in \mathbf{C}$, which completes the proof of hereditary.
+        \end{proof}
+
+        \begin{lemma}[Exchange Property]\label{lemma2}
+        The independent system $M = (E', \mathbf{C})$ satisfies the exchange property.
+        \end{lemma}
+        \begin{proof}
+        $\forall A, B \in \mathbf{C}$, suppose that $|A| < |B|$. There must exist at least one node $u$ satisfying the out-degree at node $u$ in edge set $B$ is \textbf{strictly more than} that in edge set $A$, otherwise we will derive $|B| \leq |A|$, which contradicts the premise. Therefore, there exists at least one edge $e$ started from $u$ satisfying $e \in B$ but $e \notin A$. Then $A \cup \{e\} \in \mathbf{C}$ because in node $u$, we have
+        \begin{displaymath}
+        \begin{aligned}
+        \left|\{(u, v) \mid v \in V, (u, v) \in A \cup \{e\} \}\right| &\leq \left|\{(u, v) \mid v \in V, (u, v) \in A\}\right| + 1 \\
+                                                                       &\leq \left|\{(u, v) \mid v \in V, (u, v) \in B\}\right| \\
+                                                                       &\leq f(u)
+        \end{aligned}
+        \end{displaymath}
+        and in all other nodes $u'$, we have
+        \begin{displaymath}
+        \begin{aligned}
+        \left|\{(u', v) \mid v \in V, (u', v) \in A \cup \{e\} \}\right| & \leq \left|\{(u', v) \mid v \in V, (u', v) \in A\}\right| \\
+                                                                         & \leq f(u') \quad \quad (\forall u'\in V, u' \ne u)
+        \end{aligned}
+        \end{displaymath}
+        Therefore, there exists $e \in B \backslash A$ such that $A \cup \{x\} \in \mathbf{C}$. The property is proved.
+        \end{proof}
+
+        \begin{theorem}\label{theorem3}
+        The independent system $M = (E', \mathbf{C})$ is actually a matroid.
+        \end{theorem}
+        \begin{proof}
+        We have proved the hereditary of collection $\mathbf{C}$ in Lemma \ref{lemma1} and the exchange property of $M$ in Lemma \ref{lemma2}, therefore, $M = (E', \mathbf{C})$ is a matroid.
+        \end{proof}
+    \item We define the answer as an edge set including all the edges we selected.
+        \begin{lemma}
+        The optimal answer $S^*$ only includes edges in $E'$.
+        \end{lemma}
+        \begin{proof}
+        If an optimal answer $S^*$ includes an edge $e_0 \in E \backslash E'$, then we have $w(e_0) < 0$. Then we constructed another answer $S^* \backslash \{e_0\}$, and we have
+        \begin{displaymath}
+        \sum_{e \in S^*} w(e) = w(e_0) + \sum_{e \in S^*\backslash \{e_0\}} w(e) < \sum_{e \in S^*\backslash \{e_0\}} w(e)
+        \end{displaymath}
+        Therefore, the answer $S^* \backslash \{e_0\}$ is better than the optimal answer $S^*$, which causes a contradiction. Therefore, the optimal answer only includes edges in $E'$.
+        \end{proof}
+        Up to now, we have proved that the optimal answer only selected edges from $E'$. So we can only consider about edge set $E'$, rather than the full edge set $E$. Therefore, we can write an Greedy-MAX algorithm as follows (Alg.~\ref{Greedy-1}) to solve the question.
+
+        \begin{minipage}[t]{0.8\textwidth}
+        \begin{algorithm}[H]
+            \KwIn{The Graph $G=(V,E)$ and the constraints $f(u)$ of every node $u$}
+            \KwOut{A subset of edges with maximal weight, whose out-degree at any node is no greater than the constraint}
+
+            \BlankLine
+            \caption{Greedy-MAX}
+            \label{Greedy-1}
+            Abandon all the negative-weighted edge in $E$ and form a new edge set $E'$.
+
+            Sort all elements in $E'$ into ordering $w(e_1) \geq w(e_2) \geq ... \geq w(e_m)$.
+
+            $S \leftarrow \varnothing$;
+
+            \For{$i = 1$ \textbf{to} $m$} {
+                \If{$S \cup \{e_i\} \in \mathbf{C}$} {
+                    $S \leftarrow S \cup \{e_i\}$
+                }
+            }
+            \Return{$S$};
+        \end{algorithm}
+        \end{minipage}
+
+        We have proved that $M = (E', \mathbf{C})$ is a matroid, so according to the \textit{Greedy Theorem for Independent System}, we know that our Greedy-MAX algorithm provides us an optimal answer. Therefore, the Greedy-MAX algorithm (Alg.~\ref{Greedy-1}) is \textbf{correct}.
+    \item With a few optimizations, the algorithm has a time complexity of $O(|E| \log{|E|})$.
+        \begin{itemize}
+        \item The step of abandoning negative-weighted edges takes $O(|E|)$ time.
+        \item The step of sorting edges in $E'$ takes $O(|E|\log{|E|})$ time at most.
+        \item Without any optimization, the step of choosing edge takes $O(|V|)$ time for every edge, so the whole step takes $O(|V||E|)$ time. But if we \textbf{record the current out-degree of every node in an array}, then for every edge we only need $O(1)$ time to check if the new set belongs to $\mathbf{C}$, therefore we only need $O(|E|)$ time in this step.
+        \end{itemize}
+    \end{enumerate}
+    \end{solution}
+    \clearpage
+
+
+\item Let $X$, $Y$, $Z$ be three sets. We say two triples $\left(x_{1}, y_{1}, z_{1}\right)$ and $\left(x_{2}, y_{2}, z_{2}\right)$ in $X \times Y \times Z$ are \textit{disjoint} if $x_{1} \neq x_{2}$, $y_{1} \neq y_{2},$ and $z_{1} \neq z_{2}$. Consider the following problem:
+
+    \begin{definition}[MAX-3DM]
+        Given three disjoint sets $X$, $Y$, $Z$ and a nonnegative weight function $c(\cdot)$ on all triples in $X \times Y \times Z$, \textbf{Maximum 3-Dimensional Matching} (MAX-3DM) is to find a collection $\mathcal{F}$ of disjoint triples with maximum total weight.
+    \end{definition}
+
+    \begin{enumerate}
+    	\item Let $D = X \times Y \times Z$. Define independent sets for MAX-3DM.
+    	\item Write a greedy algorithm based on Greedy-MAX in the form of \emph{pseudo code}. \label{Item-Greedy}
+    	\item Give a counterexample to show that your Greedy-MAX algorithm in Q.~\ref{Item-Greedy} is not optimal.
+    	\item Show that: $\max\limits_{F \subseteq D} \frac{v(F)}{u(F)} \leq 3$. {\color{blue}(Hint: you may need Theorem~\ref{Thm-Intersect} for this subquestion.)}
+    \end{enumerate}
+    \begin{theorem} \label{Thm-Intersect}
+        Suppose an independent system $(E, \mathcal{I})$ is the intersection of $k$ matroids $\left(E, \mathcal{I}_{i}\right)$, $1 \leq i \leq k$; that is, $\mathcal{I}=\bigcap_{i=1}^{k} \mathcal{I}_{i}$. Then $\max\limits_{F \subseteq E} \frac{v(F)}{u(F)} \leq k$, where $v(F)$ is the maximum size of independent subset in $F$ and $u(F)$ is the minimum size of maximal independent subset in $F$.
+    \end{theorem}
+    \begin{solution} Here are the answers to the questions.
+    \begin{enumerate}
+    \item We define the independent subsets of MAX-3DM as follows.
+        \begin{definition}
+        A subset $I \subseteq D$ is independent if and only if every two triples in $I$ are disjoint.
+        \end{definition}
+    \item We define $\mathbf{C}$ as the collection of all independent subsets, and define $M$ as $(D, \mathbf{C})$. Therefore $M$ is a independent system since $\mathbf{C}$ is hereditary obviously. Then we can write a Greedy-MAX algorithm (Alg.~\ref{Greedy-2}) to solve the problem.
+
+        \begin{minipage}[t]{0.8\textwidth}
+        \begin{algorithm}[H]
+            \KwIn{Three disjoint set $X, Y, Z$ and a nonnegative weight function $c(\cdot)$ on all triples in $D = X \times Y \times Z$}
+            \KwOut{A collection $\mathcal{F}$ of disjoint triples with maximum total weight}
+
+            \BlankLine
+            \caption{Greedy-MAX}
+            \label{Greedy-2}
+            Sort all the triples in $D$ into ordering $c(d_1) \geq c(d_2) \geq ... \geq c(d_m)$.
+
+            $\mathcal{F} \leftarrow \varnothing$;
+
+            \For{$i = 1$ \textbf{to} $m$} {
+                \If{$\mathcal{F} \cup \{d_i\} \in \mathbf{C}$} {
+                    $\mathcal{F} \leftarrow \mathcal{F} \cup \{d_i\}$
+                }
+            }
+            \Return{$\mathcal{F}$};
+        \end{algorithm}
+        \end{minipage}
+
+        Actually, the answer that Greedy-MAX algorithm (Alg.~\ref{Greedy-2}) provides us is not optimal sometimes (i.e., it is \textbf{incorrect}). We will discuss it further in answers to the following questions.
+    \item Here is a counter-example.
+
+        Suppose $X = \{1, 2\}, Y = \{3, 4\}, Z = \{5, 6\}$, and we define $c(\cdot)$ as follows.
+        \begin{displaymath}
+        \begin{aligned}
+        c\left( (1,3,5) \right) = 8, \quad c\left( (1,3,6) \right) = 9, \quad c\left( (1,4,5) \right) = 0, \quad c\left( (1,4,6) \right) = 0 \\
+        c\left( (2,3,5) \right) = 0, \quad c\left( (2,3,6) \right) = 0, \quad c\left( (2,4,5) \right) = 0, \quad c\left( (2,4,6) \right) = 7
+        \end{aligned}
+        \end{displaymath}
+        In Greedy-MAX algorithm, we will have the answer $\mathcal{F} = \{ (1,3,6), (2,4,5) \}$ and the total weight of $\mathcal{F}$ is $9$. But the optimal answer is $\mathcal{F^*} = \{ (1,3,5), (2,4,6) \}$ and the total weight of $\mathcal{F^*}$ is $8 + 7 = 15$.
+
+    \item We first define $i$-independent ($i = 1,2,3$) as follows.
+        \begin{definition}[$i$-independent]
+        A subset $I \subseteq D$ is $i$-independent $(i = 1,2,3)$ if and only if the numbers in the $i$-th dimension of every two triples in $I$ are different.
+        \end{definition}
+        For instance, $I_{e1} = \{ (1,2,3), (1,2,4) \}$ is $3$-independent, and $I_{e2} = \{ (2,3,4), (1,5,4) \}$ is $1$-independent and $2$-independent.
+
+        We define $\mathbf{C}_i$ $(i = 1,2,3)$ as the collection of all $i$-independent subset, and $M_i$ as an independent system constructed by $D$ and $\mathbf{C}_i$, that is, $M_i = (D, \mathbf{C}_i)\ (i = 1,2,3)$.
+
+        \begin{lemma}[Hereditary]\label{lemma6}
+        Collection $\mathbf{C}_i$ is hereditary for $i = 1,2,3$.
+        \end{lemma}
+        \begin{proof}
+        Given an $i$ from $\{1, 2, 3\}$.  $\forall B \in \mathbf{C}_i$, we know that $B$ is an $i$-independent subset, that is, the numbers in $i$-th dimension of every two triples in $B$ are different. $\forall A \subseteq B$, the numbers in $i$-th dimension of every two triples in $A$ are still different. Therefore, $A \in \mathbf{C}_i$, which completes the proof of hereditary.
+        \end{proof}
+
+        \begin{lemma}[Exchange Property]\label{lemma7}
+        The independent system $M_i = (D, \mathbf{C}_i)$ satisfies the exchange property for $i = 1,2,3$.
+        \end{lemma}
+        \begin{proof}
+        Given an $i$ from $\{1, 2, 3\}$. $\forall A, B \in \mathbf{C}_i$ and suppose that $|A| < |B|$. Suppose $\dim_j(S)$ means the set of numbers in $j$-th dimension of $S$, that is,
+        \begin{displaymath}
+        \dim_j (S) = \{a_j \mid (a_1, a_2, ..., a_j, ...) \in S\}
+        \end{displaymath}
+        There must exist at least one element $c \in \dim_i (D)$ satisfying $c \in \dim_i(B)$ but $c \notin \dim_i(A)$, otherwise we will derive that $|B| \leq |A|$, which contradicts the premise. Therefore, there exists an element $d \in B$ with its $i$-th dimension being $c$, and we have $d \notin A$ because $c \notin \dim_i(A)$. Then $A \cup \{d\} \in \mathbf{C}_i$ because the number in $i$-th dimension of $d$ (that is $c$) is different from the number of $i$-th dimension of any element in $A$ (the set of all such numbers is $\dim_i(A)$).
+
+        Therefore, there exists $d \in B \backslash A$ such that $A \cup \{d\} \in \mathbf{C}_i$. The property is proved.
+        \end{proof}
+        \begin{theorem}\label{theorem8}
+        The independent system $M_i = (D, \mathbf{C}_i)$ is actually a matroid, for $i = 1, 2, 3$.
+        \end{theorem}
+        \begin{proof}
+        Given an $i$ from $\{1, 2, 3\}$. We have proved the hereditary of collection $\mathbf{C}_i$ in Lemma \ref{lemma6} and the exchange property of $M_i$ in Lemma \ref{lemma7}, therefore, $M_i = (D, \mathbf{C}_i)$ is a matroid.
+        \end{proof}
+
+        An obvious fact is that $\cap_{i \in \{1,2,3\}} \mathbf{C}_i = \mathbf{C}$, because if the numbers of every dimension in every two triples in a set are different, then every two triples in a set are disjoint, so the set is independent.
+
+        So the independent system $M$ is the intersection of $3$ matroids $M_1, M_2, M_3$. Then according to Theorem \ref{Thm-Intersect}, we know that
+        \begin{displaymath}
+        \max\limits_{F \subseteq D} \frac{v(F)}{u(F)} \leq 3
+        \end{displaymath}
+    \end{enumerate}
+    \end{solution}
+    \clearpage
+
+	\item
+	\textbf{Crowdsourcing} is the process of obtaining needed services, ideas, or content by soliciting contributions from a large group of people, especially an online community. Suppose you want to form a team to complete a crowdsourcing task, and there are $n$ individuals to choose from. Each person $p_i$ can contribute $v_i$ ($v_i > 0$) to the team, but he/she can only work with up to $c_i$ other people. Now it is up to you to choose a certain group of people and maximize their total contributions ($\sum_i{v_i}$).
+	
+	\begin{enumerate}
+		\item Given $\text{OPT}(i, b, c)=$ maximum contributions when choosing from $\{p_1, p_2, \cdots, p_i\}$ with $b$ persons from $\{p_{i+1}, p_{i+2}, \cdots, p_n\}$ already on board and at most $c$ seats left before any of the existing team members gets uncomfortable. Describe the optimal substructure as we did in class and write a recurrence for $\text{OPT}(i, b, c)$.
+		\item Design an algorithm to form your team using dynamic programming, in the form of \emph{pseudo code}.
+        \item Analyze the time and space complexities of your design.
+	\end{enumerate}
+    \begin{solution} Here are the answers to the questions.
+    \begin{enumerate}
+    \item \textbf{Optimal Substructure}
+        \begin{itemize}
+        \item \textbf{\color{blue}Case 1}: \textbf{OPT selects person $p_i$}.
+            \begin{itemize}
+                \item Collect contribution $v_i$;
+                \item Only happens when current situation does not make person $p_i$ uncomfortable, that is, $b \leq c_i$;
+                \item Only happens when there is at least one seat left, that is, $c \geq 1$.
+                \item After selecting person $p_i$, the current optimal solution must include optimal solution to problem consisting of $(b+1)$ person from $p_i, p_{i+1},\cdots,p_n$ on board and $\min(c-1,c_i-b)$ rest seats.
+            \end{itemize}
+        \item \textbf{\color{blue}Case 2}: \textbf{OPT does not select person $p_i$}.
+            \begin{itemize}
+                \item No contribution;
+                \item The current optimal solution must include optimal solution to problem consisting of $b$ person from $p_i, p_{i+1},\cdots,p_n$ on board and $c$ rest seats.
+            \end{itemize}
+        \end{itemize}
+        Therefore, the \textbf{recurrence} is as follows (Eqn.~\eqref{eq1}).
+        \begin{equation}
+        OPT(i,b,c) = \left\{
+        \begin{aligned}
+        & \max(OPT(i - 1, b, c), \\
+        & \ \quad \quad OPT(i - 1, b + 1, \min(c - 1, c_i - b)) + v_i), & \quad (i \geq 1, c \geq 1, b \leq c_i) \\
+        & OPT(i - 1, b, c), & \quad (i \geq 1, b > c_i) \\
+        & 0, & \quad (i = 0) \\
+        \end{aligned}
+        \right.
+        \label{eq1}
+        \end{equation}
+    \item We provide the pseudo-codes of the algorithm to compute the maximum total contributions and find the solution. (Alg.~\ref{DP-1}, Alg.~\ref{DP-2} and Alg.~\ref{DP-3}).
+
+    \begin{minipage}[t]{0.9\textwidth}
+        \begin{algorithm}[H]
+            \KwIn{$n$; $v_1, v_2, \cdots, v_n$; $c_1, c_2, \cdots, c_n$;}
+            \KwOut{Maximum total contributions and the solution}
+
+            \BlankLine
+            \caption{CrowdSourcing - Memorization}
+            \label{DP-1}
+            $M[0, \cdot, \cdot] \leftarrow 0$;
+
+            $Contribution \leftarrow \mathrm{CrowdSourcing(}n, 0, n\mathrm{)}$;
+
+            $Solution \leftarrow \mathrm{FindSolution(}n, 0, n\mathrm{)}$;
+
+            \Return{$Contribution, Solution$};
+        \end{algorithm}
+    \end{minipage}
+
+    \begin{minipage}[t]{0.9\textwidth}
+        \begin{algorithm}[H]
+            \caption{CrowdSourcing(i, b, c)}
+            \label{DP-2}
+            \If{$M[i, b, c]$ is uninitialized} {
+                $M[i, b, c] \leftarrow \mathrm{CrowdSourcing(}i-1,b,c\mathrm{)}$;
+
+                \If{$c \geq 1$ \textbf{and} $b \leq c_i$} {
+                    $M[i, b, c] \leftarrow \max(M[i, b, c], \mathrm{CrowdSourcing(}i-1,b+1,\min(c-1, c_i - b)\mathrm{)} + v_i)$;
+                }
+            }
+            \Return{$M[i, b, c]$};
+        \end{algorithm}
+    \end{minipage}
+
+    \begin{minipage}[t]{0.9\textwidth}
+        \begin{algorithm}[H]
+            \caption{FindSolution(i, b, c)}
+            \label{DP-3}
+            \If{$i = 0$} {
+                \Return{$\varnothing$};
+            }
+            \If{$c \geq 1$ \textbf{and} $b \leq c_i$} {
+                \If {$M[i, b, c] < M[i-1,b+1,\min(c-1, c_i - b)] + v_i)$} {
+                    \Return{$\mathrm{FindSolution(}i-1, b+1, \min(c-1, c_i - b)\mathrm{)} \cup \{p_i\}$};
+                }
+                \Else {
+                    \Return{$\mathrm{FindSolution(}i-1, b, c\mathrm{)}$};
+                }
+            }
+            \Return{$\mathrm{FindSolution(}i-1, b, c\mathrm{)}$};
+        \end{algorithm}
+    \end{minipage}
+    \item \textbf{Space Complexity} We only use an array of length $n$ for solution recording and a $n \times n \times n$ array for memorization, so the overall space complexity is $O(n^3)$.
+
+    \textbf{Time Complexity}
+    \begin{itemize}
+    \item We have a total number $n \cdot n \cdot n = n^3$ of different states. Notice that we compute every state only once owing to memorization, that is, we invoke $\mathrm{CrowdSourcing}(\cdot, \cdot, \cdot)$ at most $n^3$ times. Each invocation takes $O(1)$ time. Therefore, the total time complexity of $\mathrm{CrowdSourcing}(\cdot, \cdot, \cdot)$ is $O(n^3)$.
+    \item Notice that we only invoke $\mathrm{FindSolution}(\cdot, \cdot, \cdot)$ exactly $n$ times, because the first argument is decreasing by $1$ every time and its original value is $n$. Each invocation takes $O(1)$ time. Therefore, the total time complexity of $\mathrm{FindSolution}(\cdot, \cdot, \cdot)$ is $O(n)$.
+    \item \textbf{Total: } The total time complexity of the algorithm is $O(n^3)$.
+    \end{itemize}
+    \end{enumerate}
+    \end{solution}
+
+    \textbf{\color{red} Here we provide better solutions to the Problem 3.}
+    \begin{solution}
+        Notice that the number of persons in a team is determined by \textbf{the minimum $c_i$ among the team members}.
+
+        We sort persons according to their $c_i$ in a non-ascending order in the beginning and re-index them according to the sorting result, then the number of persons in a team is determined by \textbf{the rightmost person we choose}.
+
+        Then let's enumerate the rightmost person we choose, suppose it is person $i$. Then the answer is simple - to find at most $c_i$ persons in person $1,2,\cdots,(i-1)$ with the largest contribution value. We have learned Greedy algorithm, so it can be easily solved by sorting the rest person according to their $v_i$ in a non-ascending order, and choosing the first $c_i$ persons.
+
+        Let's find out the current time complexity. The sorting in the beginning need $O(n\log{n})$ time. Each situation in enumerating need $O(n\log{n})$ time because of the greedy algorithm, and we enumerate $n$ times, so the overall time complexity of enumerating is $O(n^2 \log{n})$. The total time complexity is $O(n^2 \log{n})$.
+
+        We provide the pseudo-code (Alg.~\ref{imp1}) to compute the maximum total contributions. The method of finding the solution is simple and we will not discuss it here.
+
+        \begin{minipage}[t]{0.9\textwidth}
+        \begin{algorithm}[H]
+            \KwIn{$n$; $v_1, v_2, \cdots, v_n$; $c_1, c_2, \cdots, c_n$;}
+            \KwOut{Maximum total contributions}
+
+            \BlankLine
+            \caption{CrowdSourcing - Improved}
+            \label{imp1}
+            Sort persons according to their $c_i$ in a not-ascending order, and re-index them according to the sorting result;
+
+            $Contribution \leftarrow 0$;
+
+            \For{$i = n$ \textbf{downto} $1$} {
+                Copy the array $\{v_1, v_2, \cdots, v_{i-1}\}$ into $\{v'_1, v'_2, \cdots, v'_{i-1}\}$;
+
+                Sort $\{v'_1, v'_2, \cdots, v'_{i-1}\}$ into non-ascending order;
+
+                $cnt \leftarrow v_i$;
+
+                \For{$j = 1$ \textbf{to} $\min(c_i, i-1)$} {
+                    $cnt \leftarrow cnt + v'_j$;
+                }
+
+                \If{$cnt > Contribution$} {
+                    $Contribution \leftarrow cnt$;
+                }
+            }
+            \Return{$Contribution$};
+        \end{algorithm}
+        \end{minipage}
+
+        This solution seems better than the previous one, but - we can optimize it to reach the time complexity of only $O(n\log{n})$!
+
+        Let's find out what will be changed if we change our rightmost person from $i$ to $(i-1)$.
+        \begin{itemize}
+        \item We cannot choose person $i$, and we must choose person $(i-1)$;
+        \item We will choose $c_{i-1}$ persons among person $1, 2, ..., (i-2)$, instead of choosing $c_i$ persons among person $1, 2, ..., (i-1)$.
+        \end{itemize}
+
+        But - the most important thing - our choosing strategy won't change! It's always choose the person with the highest contribution first!
+
+        Then we need a data structure supporting:
+        \begin{itemize}
+        \item Insert a value $v$ into the data structure;
+        \item Delete a value $v$ from the data structure;
+        \item Find out the sum among the biggest value, the second biggest value, ..., the $k$-th biggest value in the data structure.
+        \end{itemize}
+
+        The balanced tree, such as AVL Tree, Red-Black Tree, works! They can support all these operation in $O(\log{n})$ time once.
+
+        \textbf{Specific Explanation}: {\color{blue} We will store the values according to themselves in the tree, and we record the size of every sub-tree and the sum of every sub-tree. It's easy to maintain these things when inserting or deleting in $O(\log{n})$ time. When requiring the answer, we only need to find the rightmost $k$ values in the tree. We will start from root and check if the right sub-tree has enough values, if true, then go to the right sub-tree and use the same strategies recursively. If false, then we must choose all the values in the right sub-tree, the sum of which is in the sum tag, and we go to the left sub-tree to select the rest values using the same strategies recursively. This process will only take $O(\log{n})$ time.}
+        \clearpage
+        The whole procedure of the algorithm is:
+        \begin{itemize}
+        \item Sort the persons according to their $c_i$ in a non-ascending order.
+        \item Insert their $v_i$ into a balanced tree.
+        \item Enumerate the rightmost person $i$ we choose in an descending order.
+        \begin{itemize}
+        \item Delete $v_i$ from balanced tree.
+        \item Find at most $c_i$ values with the biggest summation from the balanced tree.
+        \item Calculate the total contributions.
+        \item Check if it can update the current maximum total contributions.
+        \end{itemize}
+        \item Then, we find out the maximum total contributions.
+        \end{itemize}
+        The pseudo-code of the algorithm is as follows (Alg.~\ref{imp2}).
+
+
+        \begin{minipage}[t]{0.9\textwidth}
+        \begin{algorithm}[H]
+            \KwIn{$n$; $v_1, v_2, \cdots, v_n$; $c_1, c_2, \cdots, c_n$;}
+            \KwOut{Maximum total contributions}
+
+            \BlankLine
+            \caption{CrowdSourcing - Improved Again}
+            \label{imp2}
+            Sort persons according to their $c_i$ in a not-ascending order, and re-index them according to the sorting result;
+
+            $Contribution \leftarrow 0$;
+
+            $T \leftarrow \varnothing$;
+
+            \tcp{\color{purple}$T$ is a balanced tree.}
+
+            \For{$i = 1$ \textbf{to} $n$} {
+                $\mathrm{Insert}(T, v_i)$;
+
+                \tcp{\color{purple}Insert($T$, $v$) means inserting $v_i$ into tree $T$.}
+            }
+
+            \For{$i = n$ \textbf{downto} $1$} {
+                $\mathrm{Delete}(T, v_i)$;
+
+                \tcp{\color{purple}Delete($T$, $v$) means deleting $v_i$ from tree $T$.}
+
+                $cnt \leftarrow v_i + \mathrm{FindK}(T, \min(c_i, i-1))$;
+
+                \tcp{\color{purple}FindK($T$, $k$) means finding the largest $k$ elements in tree $T$.}
+
+                \If{$cnt > Contribution$} {
+                    $Contribution \leftarrow cnt$;
+                }
+            }
+            \Return{$Contribution$};
+        \end{algorithm}
+        \end{minipage}
+
+        The time complexity of the final algorithm (Alg.~\ref{imp2}) is only $O(n\log{n})$, which is a lot faster than $O(n^3)$ in our original algorithm (Alg.~\ref{DP-1}). What's more, its space complexity is only $O(n)$!
+    \end{solution}
+\end{enumerate}
+
+\vspace{20pt}
+
+\textbf{Remark:} You need to include your .pdf and .tex files in your uploaded .rar or .zip file.
+
+%========================================================================
+\end{document}

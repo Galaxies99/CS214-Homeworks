@@ -1,0 +1,555 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{ctex}
+\usepackage{amsmath,amscd,amsbsy,amssymb,latexsym,url,bm,amsthm}
+\usepackage{epsfig,graphicx,subfigure}
+\usepackage{enumitem,balance}
+\usepackage{wrapfig}
+\usepackage{mathrsfs,euscript}
+\usepackage[usenames]{xcolor}
+\usepackage{hyperref}
+\usepackage[vlined,ruled,linesnumbered]{algorithm2e}
+\usepackage{array}
+\hypersetup{colorlinks=true,linkcolor=black}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{exercise}{Exercise}
+\newtheorem*{solution}{Solution}
+\newtheorem{definition}{Definition}
+\theoremstyle{definition}
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\newcommand{\postscript}[2]
+ {\setlength{\epsfxsize}{#2\hsize}
+  \centerline{\epsfbox{#1}}}
+
+\renewcommand{\baselinestretch}{1.0}
+
+\setlength{\oddsidemargin}{-0.365in}
+\setlength{\evensidemargin}{-0.365in}
+\setlength{\topmargin}{-0.3in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\textheight}{10.1in}
+\setlength{\textwidth}{7in}
+\makeatletter \renewenvironment{proof}[1][Proof] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+\makeatletter
+\renewenvironment{solution}[1][Solution] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+
+\begin{document}
+\noindent
+
+%========================================================================
+\noindent\framebox[\linewidth]{\shortstack[c]{
+\Large{\textbf{Lab06-Linear Programming}}\vspace{1mm}\\
+CS214-Algorithm and Complexity, Xiaofeng Gao, Spring 2020.}}
+\begin{center}
+\footnotesize{\color{red}$*$ If there is any problem, please contact TA Yiming Liu. }
+
+\footnotesize{\color{blue}$*$ Name:Hongjie Fang  \quad Student ID:518030910150 \quad Email: galaxies@sjtu.edu.cn}
+\end{center}
+\begin{enumerate}
+
+   \item
+   \textbf{Controlling Air Pollution. }The three main types of pollutants in an airshed are particulate matter, sulfur oxides, and hydrocarbons. The new standards require that the steelworks reduce its annual emission of these pollutants by the amounts shown in the following table:
+	\begin{table}[h]
+		\footnotesize
+		\centering
+	    \label{standards}
+	    \renewcommand\arraystretch{1.1}
+		\begin{tabular}{lc}
+			
+			\hline
+			\textbf{Pollutant} & \textbf{\begin{tabular}[c]{@{}c@{}}Required Reduction in Annual \\ Emission Rate (Million Pounds)\end{tabular}} \\ \hline
+			Particulates       & 60                                                                                                              \\
+			Sulfur oxides      & 150                                                                                                             \\
+			Hydrocarbons       & 125                                                                                                             \\ \hline
+		\end{tabular}
+	\end{table}
+    \par The steelworks has two primary sources of pollution, namely, the blast furnaces for making pig iron and the open-hearth furnaces for changing iron into steel. In both cases the engineers have decided that the most effective types of abatement methods are (1) increasing the height of the smokestacks, (2) using filter devices (including gas traps) in the smokestacks, and (3) including cleaner, high-grade materials among the fuels for the furnaces. Note that each of these methods has a technological limit on how heavily it can be used (e.g., a maximum feasible increase in the height of the smokestacks), but there also is considerable
+    flexibility for using the method at a fraction of its technological limit.
+    \par The following table shows how much emission (in millions of pounds per year) can be eliminated from each type of furnace by fully using any abatement method to its technological limit. For purposes of analysis, it is assumed that each method also can be used less fully to achieve any fraction of the emission-rate reductions shown in this table. Furthermore, the fractions can be different for blast furnaces and for open-hearth furnaces. For either type of furnace, the emission reduction achieved by each method is not substantially affected by whether the other methods also are used.
+    \begin{table}[h]
+ 	\footnotesize
+ 	\centering
+ 	\label{reduction}
+ 	\renewcommand\arraystretch{1.1}
+ 	\begin{tabular}{ccccccc}
+ 		\hline
+ 		\textbf{}          & \multicolumn{2}{c}{\textbf{Taller Smokestacks}}                                                                                           & \multicolumn{2}{c}{\textbf{Filters}}                                                                                                       & \multicolumn{2}{c}{\textbf{Better Fuels}}                                                                                                   \\ \hline
+ 		\textbf{Pollutant} & \textbf{\begin{tabular}[c]{@{}c@{}}Blast\\ Furnaces\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Open-Hearth\\ Furnaces\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Blast\\ Furnaces\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Open-Hearth\\ Furnaces\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Blast\\ Furnaces\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Open-Hearth\\ Furnaces\end{tabular}} \\ \hline
+ 		Particulates       & 12  & 9   & 25 & 20 & 17 & 13                                                   \\
+ 		Sulfur oxides      & 35 & 42  & 18  & 31  & 56 & 49\\
+ 		Hydrocarbons       & 37  & 53  & 28  & 24  & 29  & 20\\                                                                       \hline
+ 	\end{tabular}
+ \end{table}
+
+    The total annual cost from the maximum feasible use of an abatement method  (in millions of dollars) was shown in the following table.  The board of directors wants to figure out how to achieve these reductions with minimum annual cost. Please design a scheme for them.
+
+    \begin{table}[h]
+    	\centering
+    	\footnotesize
+    	\label{annualcost}
+        \renewcommand\arraystretch{1.1}
+    	\begin{tabular}{lclcl}
+    		\hline
+    		\multicolumn{1}{c}{\textbf{Abatement Method}} & \multicolumn{2}{c}{\textbf{Blast Furnaces}} & \multicolumn{2}{c}{\textbf{Open-Health Furnaces}} \\ \hline
+    		Taller smokestacks                             & \multicolumn{2}{c}{8}                       & \multicolumn{2}{c}{10}                           \\
+    		Filters                                        & \multicolumn{2}{c}{7}                       & \multicolumn{2}{c}{6}                            \\
+    		Better fuels                                   & \multicolumn{2}{c}{11}                      & \multicolumn{2}{c}{9}                            \\ \hline
+    	\end{tabular}
+
+    \end{table}
+
+
+    \begin{enumerate}
+    	\item Formulate a linear programming with necessary explanations.
+    	\item
+    	Transform your LP into its standard form.
+    	\item
+    	Transform your LP into its dual form.
+    	\item
+    	Assume that the clean air standards have been relaxed. The steelworks only needs to meet any two of the three pollutants emission standards. Please update your LP in (a) to satisfy the relaxed clean air standards. {\color{blue}(Hint: You can refer to Reference14-ModelFormulation.pdf)}
+    \end{enumerate}
+    \begin{solution}
+    Here are my answers to four sub-problems.
+    \begin{enumerate}
+    \item Let variables $x_1, x_2, x_3, x_4, x_5$ and $x_6$ denote the usage of every abatement method in each type of furnace. The corresponding relations are as follows.
+        \begin{table}[h]
+     	\footnotesize
+     	\centering
+     	\label{reduction}
+     	\renewcommand\arraystretch{1.1}
+     	\begin{tabular}{ccccccc}
+     		\hline
+     		\textbf{}          & \multicolumn{2}{c}{\textbf{Taller Smokestacks}} & \multicolumn{2}{c}{\textbf{Filters}} & \multicolumn{2}{c}{\textbf{Better Fuels}} \\ \hline
+            \textbf{Pollutant} & \textbf{\begin{tabular}[c]{@{}c@{}}Blast\\ Furnaces\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Open-Hearth\\ Furnaces\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Blast\\ Furnaces\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Open-Hearth\\ Furnaces\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Blast\\ Furnaces\end{tabular}} & \textbf{\begin{tabular}[c]{@{}c@{}}Open-Hearth\\ Furnaces\end{tabular}} \\ \hline
+             		Usage       & $x_1$  & $x_2$   & $x_3$ & $x_4$ & $x_5$ & $x_6$                                                   \\ \hline
+     	\end{tabular}
+        \end{table}
+
+        For $i = 1,2,3,4,5,6$, we stipulate that $x_i = 0$ denotes we do not use the method, and $x_i = 1$ denotes we fully use this method. Since each method can be used less fully to achieve any fraction of the emission-rate reductions, $x_i$ can be any fraction in range $[0,1]$.
+
+        We also have to meet the requirements of reductions in pollution, therefore we have the following inequality constraints.
+        \begin{displaymath}
+        \left\{
+        \begin{aligned}
+        12 &x_1 + & 9 &x_2 + & 25 &x_3 + & 20 &x_4 + & 17 &x_5 + & 13 &x_6 \geq& 60 \\
+ 		35 &x_1 + & 42 &x_2 + & 18 &x_3 + & 31 &x_4 + & 56 &x_5 + & 49 &x_6 \geq& 150 \\
+ 		37 &x_1 + & 53 &x_2 + & 28 &x_3 + & 24 &x_4 + & 29 &x_5 + & 20 &x_6 \geq& 125 \\
+        \end{aligned}
+        \right.
+        \end{displaymath}
+
+        We want to minimize the annual cost to achieve the reductions, that is, we want to minimize the value of the following formula.
+        \begin{displaymath}
+        8x_1 + 10x_2 + 7x_3 + 6x_4 + 11x_5 + 9x_6
+        \end{displaymath}
+
+        Therefore, we can form a linear programming model as follows.
+        \begin{displaymath}
+        \begin{aligned}
+        & \min && 8  x_1 + 10 x_2 + 7 x_3 + 6 x_4 + 11 x_5 + 9 x_6 \\
+        & s.t. && 12 x_1 + 9 x_2 + 25 x_3 + 20 x_4 + 17 x_5 + 13 x_6 \geq 60, \\
+ 		&      && 35 x_1 + 42 x_2 + 18 x_3 + 31 x_4 + 56 x_5 + 49 x_6 \geq 150, \\
+ 		&      && 37 x_1 + 53 x_2 + 28 x_3 + 24 x_4 + 29 x_5 + 20 x_6 \geq 125, \\
+        &      && x_1, x_2, x_3, x_4, x_5, x_6                        \leq 1, \\
+        &      && x_1, x_2, x_3, x_4, x_5, x_6                        \geq 0. \\
+        \end{aligned}
+        \end{displaymath}
+
+    \item The standard form of this LP is as follows.
+        \begin{displaymath}
+        \begin{aligned}
+        & \max && -8 x_1 - 10 x_2 - 7 x_3 - 6 x_4 - 11 x_5 - 9 x_6 \\
+        & s.t. && -12 x_1 - 9 x_2 - 25 x_3 - 20 x_4 - 17 x_5 - 13 x_6  \leq -60, \\
+ 		&      && -35 x_1 - 42 x_2 - 18 x_3 - 31 x_4 - 56 x_5 - 49 x_6 \leq -150, \\
+ 		&      && -37 x_1 - 53 x_2 - 28 x_3 - 24 x_4 - 29 x_5 - 20 x_6 \leq -125, \\
+        &      && x_1, x_2, x_3, x_4, x_5, x_6                        \leq 1, \\
+        &      && x_1, x_2, x_3, x_4, x_5, x_6                        \geq 0. \\
+        \end{aligned}
+        \end{displaymath}
+
+    \item The dual form of this LP is as follows.
+    \begin{displaymath}
+    \begin{aligned}
+    & \min && -60 y_1 - 150 y_2 - 125 y_3 + y_4 + y_5 + y_6 + y_7 + y_8 + y_9 \\
+    & s.t. && -12 y_1 - 35 y_2 - 37 y_3 + y_4 \geq -8, \\
+    &      && -9 y_1 - 42 y_2 - 53 y_3 + y_5 \geq -10, \\
+    &      && -25 y_1 - 18 y_2 - 28 y_3 + y_6 \geq -7, \\
+    &      && -20 y_1 - 31 y_2 - 24 y_3 + y_7 \geq -6, \\
+    &      && -17 y_1 - 56 y_2 - 29 y_3 + y_8 \geq -11, \\
+    &      && -13 y_1 - 49 y_2 - 20 y_3 + y_9 \geq -9, \\
+    &      && y_1,y_2,y_3,y_4,y_5,y_6,y_7,y_8,y_9 \geq 0. \\
+    \end{aligned}
+    \end{displaymath}
+
+    \item Let $M$ symbolize a very large positive number, for instance, we assume that $M = 10^9$. Then we add three extra binary variables $z_1, z_2, z_3$ and the specific meanings of them are listed below.
+        \begin{table}[h]
+		\footnotesize
+		\centering
+	    \label{standards}
+	    \renewcommand\arraystretch{1.1}
+		\begin{tabular}{lc}
+			
+			\hline
+			\textbf{Pollutant} & \textbf{\begin{tabular}[c]{@{}c@{}}Whether to Meet the Requirement \\ ($z_i = 1$ means Yes; $z_i = 0$ means No)\end{tabular}} \\ \hline
+			Particulates       & $z_1$       \\
+			Sulfur oxides      & $z_2$       \\
+			Hydrocarbons       & $z_3$       \\ \hline
+		\end{tabular}
+	    \end{table}
+
+        Therefore, we update the LP in (a) as follows.
+        \begin{displaymath}
+        \begin{aligned}
+        & \min && 8  x_1 + 10 x_2 + 7 x_3 + 6 x_4 + 11 x_5 + 9 x_6 \\
+        & s.t. && 12 x_1 + 9 x_2 + 25 x_3 + 20 x_4 + 17 x_5 + 13 x_6 \geq 60 - M(1 - z_1), \\
+ 		&      && 35 x_1 + 42 x_2 + 18 x_3 + 31 x_4 + 56 x_5 + 49 x_6 \geq 150 - M(1 - z_2), \\
+ 		&      && 37 x_1 + 53 x_2 + 28 x_3 + 24 x_4 + 29 x_5 + 20 x_6 \geq 125 - M(1 - z_3), \\
+        &      && z_1 + z_2 + z_3 \geq 2, \\
+        &      && x_1, x_2, x_3, x_4, x_5, x_6                        \leq 1, \\
+        &      && x_1, x_2, x_3, x_4, x_5, x_6                        \geq 0, \\
+        &      && \textrm{and\ } z_1, z_2, z_3 \textrm{\ are\ binary}.
+        \end{aligned}
+        \end{displaymath}
+    \end{enumerate}
+    \end{solution}
+    \clearpage
+
+
+	\item
+	\textbf{Factory Production. }An engineering factory makes seven products (PROD 1 to PROD 7) on the following machines: four grinders, two vertical drills, three horizontal drills, one borer and two planer. Each product yields a certain contribution to profit (in \pounds/unit). These quantities (in \pounds/unit) together with the unit production times (hours) required on each process are given below. A dash indicates that a product does not require a process.
+	
+	\begin{table}[htbp]
+		\scriptsize
+		\centering
+		\renewcommand\arraystretch{1.1}
+		\begin{tabular}{m{0.18\textwidth} m{0.07\textwidth}<{\centering} m{0.07\textwidth}<{\centering} m{0.07\textwidth}<{\centering} m{0.07\textwidth}<{\centering} m{0.07\textwidth}<{\centering} m{0.07\textwidth}<{\centering} m{0.07\textwidth}<{\centering}}
+			\hline
+			& \textbf{PROD 1} & \textbf{PROD 2} & \textbf{PROD 3} & \textbf{PROD 4} & \textbf{PROD 5} & \textbf{PROD 6} &  \textbf{PROD 7} \\\hline
+			Contribution to profit & 10 & 6 & 8 & 4 & 11 & 9 & 3 \\
+			Grinding & 0.5 & 0.7 & 0.2 & - & 0.3 & 0.2 & 0.5 \\
+			Vertical drilling & 0.1 & 0.2 & - & 0.3 & - & 0.6 & - \\
+			Horizontal drilling & 0.2 & - & 0.8 & - & - & - & 0.6 \\
+			Boring & 0.05 & 0.03 & - & 0.07 & 0.1 & - & 0.08 \\
+			Planing & - & - & 0.01 & - & 0.05 & 0.02 & 0.04 \\
+			\hline
+		\end{tabular}
+	\end{table}
+	
+	There are marketing limitations on each product in each month, given in the following table:
+	
+	\begin{table}[htbp]
+		\scriptsize
+		\centering
+		\renewcommand\arraystretch{1.1}
+		\begin{tabular}{m{0.1\textwidth} m{0.07\textwidth}<{\centering} m{0.07\textwidth}<{\centering} m{0.07\textwidth}<{\centering} m{0.07\textwidth}<{\centering} m{0.07\textwidth}<{\centering} m{0.07\textwidth}<{\centering} m{0.07\textwidth}<{\centering}}
+			\hline
+			& \textbf{PROD 1} & \textbf{PROD 2} & \textbf{PROD 3} & \textbf{PROD 4} & \textbf{PROD 5} & \textbf{PROD 6} &  \textbf{PROD 7} \\\hline
+			January & 500 & 1000 & 300 & 300 & 800 & 200 & 100 \\
+			February & 600 & 500 & 200 & 0 & 400 & 300 & 150 \\
+			March & 300 & 600 & 0 & 0 & 500 & 400 & 100 \\
+			April & 200 & 300 & 400 & 500 & 200 & 0 & 100 \\
+			May & 0 & 100 & 500 & 100 & 1000 & 300 & 0 \\
+			June & 500 & 500 & 100 & 300 & 1100 & 500 & 60 \\
+			\hline
+		\end{tabular}
+	\end{table}
+	
+	It is possible to store up to 100 of each product at a time at a cost of \pounds0.5 per unit per month (charged at the end of each month according to the amount held at that time). There are no stocks at present, but it is desired to have a stock of exactly 50 of each type of product at the end of June. The factory works six days a week with two shifts of 8h each day. It may be assumed that each month consists of only 24 working days. Each machine must be down for maintenance in one month of the six. No sequencing problems need to be considered.
+	
+	When and what should the factory make in order to maximize the total net profit?
+	
+	\begin{enumerate}
+		\item
+		Use \emph{CPLEX Optimization Studio} to solve this problem. Describe your model in \emph{Optimization Programming Language} (OPL). Remember to use a separate data file (.dat) rather than embedding the data into the model file (.mod).
+		
+		\item
+		Solve your model and give the following results.
+		\begin{enumerate}
+			\item
+			For each machine:
+			\begin{enumerate}
+				\item
+				the month for maintenance.
+			\end{enumerate}
+			\item
+			For each product:
+			\begin{enumerate}
+				\item
+				The amount to make in each month.
+				\item
+				The amount to sell in each month.
+				\item
+				The amount to hold at the end of each month.
+			\end{enumerate}
+			\item
+			The total selling profit.
+			\item
+			The total holding cost.
+			\item
+			The total net profit (selling profit minus holding cost).
+		\end{enumerate}
+	\end{enumerate}
+    \begin{solution} Here are my answers to two sub-problems.
+    \begin{enumerate}
+    \item In order to make the explanations brief and explicit, we make the following assumptions.
+        \begin{itemize}
+        \item Month $1$, month $2$, $\cdots$, month $6$ denote January, February, $\cdots$, June respectively.
+        \item Machine $1$, machine $2$, $\cdots$, machine $5$ denote grinders, vertical drills, horizontal drills, borer and planer respectively.
+        \end{itemize}
+        Let variable $x_{i,j}$ denote the amount of newly-produced PROD $j$ in month $i$. Here is the specific corresponding relations table.
+    	\begin{table}[htbp]
+    		\scriptsize
+    		\centering
+    		\renewcommand\arraystretch{1.1}
+    		\begin{tabular}{m{0.1\textwidth} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering}}
+    			\hline
+    			& \textbf{Amount of Newly-Produced PROD 1} & \textbf{Amount of Newly-Produced PROD 2} & \textbf{Amount of Newly-Produced PROD 3} & \textbf{Amount of Newly-Produced PROD 4} & \textbf{Amount of Newly-Produced PROD 5} & \textbf{Amount of Newly-Produced PROD 6} &  \textbf{Amount of Newly-Produced PROD 7} \\\hline
+    			January & $x_{1,1}$ & $x_{1,2}$ & $x_{1,3}$ & $x_{1,4}$ & $x_{1,5}$ & $x_{1,6}$ & $x_{1,7}$ \\
+    			February & $x_{2,1}$ & $x_{2,2}$ & $x_{2,3}$ & $x_{2,4}$ & $x_{2,5}$ & $x_{2,6}$ & $x_{2,7}$ \\
+    			March & $x_{3,1}$ & $x_{3,2}$ & $x_{3,3}$ & $x_{3,4}$ & $x_{3,5}$ & $x_{3,6}$ & $x_{3,7}$ \\
+    			April & $x_{4,1}$ & $x_{3,2}$ & $x_{4,3}$ & $x_{4,4}$ & $x_{4,5}$ & $x_{4,6}$ & $x_{4,7}$ \\
+    			May & $x_{5,1}$ & $x_{5,2}$ & $x_{5,3}$ & $x_{5,4}$ & $x_{5,5}$ & $x_{5,6}$ & $x_{5,7}$ \\
+    			June & $x_{6,1}$ & $x_{6,2}$ & $x_{6,3}$ & $x_{6,4}$ & $x_{6,5}$ & $x_{6,6}$ & $x_{6,7}$ \\
+    			\hline
+    		\end{tabular}
+    	\end{table}
+
+        Let variable $y_{i,j}$ denote the amount of stocks of PROD $j$ at the end of month $i$. Here is the specific corresponding relations table.
+        \begin{table}[htbp]
+    		\scriptsize
+    		\centering
+    		\renewcommand\arraystretch{1.1}
+    		\begin{tabular}{m{0.1\textwidth} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering}}
+    			\hline
+    			& \textbf{Amount of Stocks of PROD 1} & \textbf{Amount of Stocks of PROD 2} & \textbf{Amount of Stocks of PROD 3} & \textbf{Amount of Stocks of PROD 4} & \textbf{Amount of Stocks of PROD 5} & \textbf{Amount of Stocks of PROD 6} &  \textbf{Amount of Stocks of PROD 7} \\\hline
+    			At the end of January & $y_{1,1}$ & $y_{1,2}$ & $y_{1,3}$ & $y_{1,4}$ & $y_{1,5}$ & $y_{1,6}$ & $y_{1,7}$ \\
+    			At the end of February & $y_{2,1}$ & $y_{2,2}$ & $y_{2,3}$ & $y_{2,4}$ & $y_{2,5}$ & $y_{2,6}$ & $y_{2,7}$ \\
+    			At the end of March & $y_{3,1}$ & $y_{3,2}$ & $y_{3,3}$ & $y_{3,4}$ & $y_{3,5}$ & $y_{3,6}$ & $y_{3,7}$ \\
+    			At the end of April & $y_{4,1}$ & $y_{3,2}$ & $y_{4,3}$ & $y_{4,4}$ & $y_{4,5}$ & $y_{4,6}$ & $y_{4,7}$ \\
+    			At the end of May & $y_{5,1}$ & $y_{5,2}$ & $y_{5,3}$ & $y_{5,4}$ & $y_{5,5}$ & $y_{5,6}$ & $y_{5,7}$ \\
+    			At the end of June & $y_{6,1}$ & $y_{6,2}$ & $y_{6,3}$ & $y_{6,4}$ & $y_{6,5}$ & $y_{6,6}$ & $y_{6,7}$ \\
+    			\hline
+    		\end{tabular}
+    	\end{table}
+
+        Besides, we add some auxiliary variables $y_{0,1}, y_{0,2}, \cdots, y_{0,7}$ to represent the initial stocks of each product, and obviously the values of them are all zero according to the problem descriptions. What's more, we notice that the variables $y_{6,1}, y_{6,2}, \cdots, y_{6,7}$ are all auxiliary variables, since the values of them should be $50$ according to the problem descriptions. Therefore,
+        \begin{equation}
+        \begin{aligned}
+        &\textrm{For\ } j = 1,2,3,4,5,6,7, \quad y_{0,j} = 0 \\
+        &\textrm{For\ } j = 1,2,3,4,5,6,7, \quad y_{6,j} = 50
+        \end{aligned}
+        \label{rest1}
+        \end{equation}
+
+        Let auxiliary variables $t_{i,j}$ denote the amount of PROD $j$ on market in month $i$. Here is the specific corresponding relations table.
+        \begin{table}[htbp]
+    		\scriptsize
+    		\centering
+    		\renewcommand\arraystretch{1.1}
+    		\begin{tabular}{m{0.1\textwidth} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering}}
+    			\hline
+    			& \textbf{Amount of PROD 1 on Market} & \textbf{Amount of PROD 2 on Market} & \textbf{Amount of PROD 3 on Market} & \textbf{Amount of PROD 4 on Market} & \textbf{Amount of PROD 5 on Market} & \textbf{Amount of PROD 6 on Market} &  \textbf{Amount of PROD 7 on Market} \\\hline
+    			January & $t_{1,1}$ & $t_{1,2}$ & $t_{1,3}$ & $t_{1,4}$ & $t_{1,5}$ & $t_{1,6}$ & $t_{1,7}$ \\
+    			February & $t_{2,1}$ & $t_{2,2}$ & $t_{2,3}$ & $t_{2,4}$ & $t_{2,5}$ & $t_{2,6}$ & $t_{2,7}$ \\
+    			March & $t_{3,1}$ & $t_{3,2}$ & $t_{3,3}$ & $t_{3,4}$ & $t_{3,5}$ & $t_{3,6}$ & $t_{3,7}$ \\
+    			April & $t_{4,1}$ & $t_{3,2}$ & $t_{4,3}$ & $t_{4,4}$ & $t_{4,5}$ & $t_{4,6}$ & $t_{4,7}$ \\
+    			May & $t_{5,1}$ & $t_{5,2}$ & $t_{5,3}$ & $t_{5,4}$ & $t_{5,5}$ & $t_{5,6}$ & $t_{5,7}$ \\
+    			June & $t_{6,1}$ & $t_{6,2}$ & $t_{6,3}$ & $t_{6,4}$ & $t_{6,5}$ & $t_{6,6}$ & $t_{6,7}$ \\
+    			\hline
+    		\end{tabular}
+    	\end{table}
+
+        It's easy to notice the relations among $t_{\cdot, \cdot}$, $x_{\cdot, \cdot}$ and $y_{\cdot, \cdot}$, that is,
+        \begin{equation}
+        \textrm{For\ } i = 1,2,3,4,5,6 \textrm{\ and\ } j = 1,2,3,4,5,6,7,\quad t_{i,j} = y_{i-1, j} + x_{i,j} - y_{i, j}
+        \label{rest2}
+        \end{equation}
+
+        And some simple restrictions of $t_{i,j}$ should be set as follows.
+        \begin{equation}
+        \textrm{For\ } i = 1,2,3,4,5,6 \textrm{\ and\ } j = 1,2,3,4,5,6,7,\quad 0 \leq t_{i,j} \leq T_{i,j}, \quad t_{i,j} \in \mathbb{Z}
+        \label{rest3}
+        \end{equation}
+
+        where $T_{i,j}$ is the marketing limitation on PROD $j$ in month $i$ displayed in the row $i$, column $j$ of the table in the problem descriptions.
+
+        Let variable $z_{i,j}$ denote the number of machine $j$ in maintenance in month $i$. Here is the specific corresponding relations table.
+    	\begin{table}[htbp]
+    		\scriptsize
+    		\centering
+    		\renewcommand\arraystretch{1.1}
+    		\begin{tabular}{m{0.1\textwidth} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering}}
+    			\hline
+    			& \textbf{Number of Machine 1 in Maintenance} & \textbf{Number of Machine 2 in Maintenance} & \textbf{Number of Machine 3 in Maintenance} & \textbf{Number of Machine 4 in Maintenance} & \textbf{Number of Machine 5 in Maintenance} \\\hline
+    			January & $z_{1,1}$ & $z_{1,2}$ & $z_{1,3}$ & $z_{1,4}$ & $z_{1,5}$ \\
+    			February & $z_{2,1}$ & $z_{2,2}$ & $z_{2,3}$ & $z_{2,4}$ & $z_{2,5}$ \\
+    			March & $z_{3,1}$ & $z_{3,2}$ & $z_{3,3}$ & $z_{3,4}$ & $z_{3,5}$ \\
+    			April & $z_{4,1}$ & $z_{3,2}$ & $z_{4,3}$ & $z_{4,4}$ & $z_{4,5}$ \\
+    			May & $z_{5,1}$ & $z_{5,2}$ & $z_{5,3}$ & $z_{5,4}$ & $z_{5,5}$ \\
+    			June & $z_{6,1}$ & $z_{6,2}$ & $z_{6,3}$ & $z_{6,4}$ & $z_{6,5}$ \\
+    			\hline
+    		\end{tabular}
+    	\end{table}
+
+        Now let us check the restrictions of the problem and try to make some restrictions to our variables. First we need to guarantee that every machine must be down in one month for maintenance, that is,
+
+        \begin{equation}
+        \begin{aligned}
+        & \begin{aligned}
+        \sum_{i = 1}^6 z_{i,1} = 4, & \quad \sum_{i = 1}^6 z_{i,2} = 2, \quad \sum_{i = 1}^6 z_{i,3} = 3, \\
+        \sum_{i = 1}^6 z_{i,4} = 1, & \quad \sum_{i = 1}^6 z_{i,5} = 2, \\
+        \end{aligned} \\
+        & \textrm{For\ } i = 1,2,3,4,5,6 \textrm{\ and\ } j = 1,2,3,4,5, \quad z_{i,j} \geq 0, \quad z_{i,j} \in \mathbb{Z}. \\
+        \end{aligned}
+        \label{rest4}
+        \end{equation}
+
+        Notice that the inequality constraints have already set the upper limits of $z_{i,j}$ automatically, so we do not have to write them again.
+
+        We can store up to 100 units of each product at the end of every month, therefore we have the following restrictions.
+        \begin{equation}
+        \textrm{For\ } i = 1,2,3,4,5 \textrm{\ and\ } j = 1,2,3,4,5,6,7,\quad 0 \leq y_{i,j} \leq 100, \quad y_{i,j} \in \mathbb{Z}.
+        \label{rest5}
+        \end{equation}
+
+        There are some simple limitations of $x_{i,j}$ that should be set, which are as follows.
+        \begin{equation}
+        \textrm{For\ } i = 1,2,3,4,5,6 \textrm{\ and\ } j = 1,2,3,4,5,6,7,\quad x_{i,j} \geq 0, \quad x_{i,j} \in \mathbb{Z}.
+        \label{rest6}
+        \end{equation}
+
+        Then we need to guarantee that for every month, the newly-produced product can be produced by the machines. There are totally $24 \times 8 \times 2 = 384$ working hours per month for every machine. Therefore, we can make the following restrictions.
+
+        \begin{equation}
+        \begin{aligned}
+        & \textrm{For\ } i = 1,2,3,4,5,6, \\
+        & \begin{aligned}
+        && 0.5 x_{i,1} + 0.7 x_{i,2} + 0.2 x_{i,3} + 0.3 x_{i,5} + 0.2 x_{i,6} + 0.5 x_{i,7} & \leq 384(4 - z_{i,1}), \\
+        && 0.1 x_{i,1} + 0.2 x_{i,2} + 0.3 x_{i,4} + 0.6 x_{i,6} & \leq 384(2 - z_{i,2}), \\
+	    && 0.2 x_{i,1} + 0.8 x_{i,3} + 0.6 x_{i,7} & \leq 384(3 - z_{i,3}), \\
+		&& 0.05 x_{i,1} + 0.03 x_{i,2} + 0.07 x_{i,4} + 0.1 x_{i,5} + 0.08 x_{i,7} & \leq 384(1 - z_{i,4}), \\
+		&& 0.01 x_{i,3} + 0.05 x_{i,5} + 0.02 x_{i,6} + 0.04 x_{i,7} & \leq 384(2 - z_{i,5}). \\
+        \end{aligned}
+        \end{aligned}
+        \label{rest7}
+        \end{equation}
+
+        Combine the restrictions \eqref{rest1},\eqref{rest2},\eqref{rest3},\eqref{rest4},\eqref{rest5},\eqref{rest6} and \eqref{rest7} together, we can get the final restrictions to all variables.
+
+        Now let us calculate the selling profit and holding cost of the factory. Let $P$ be the total selling profit, then we have the following equation.
+        \begin{equation}
+        P = 10 \sum_{i=1}^6{t_{i,1}} + 6 \sum_{i=1}^6{t_{i,2}} + 8\sum_{i=1}^6{t_{i,3}} + 4\sum_{i=1}^6{t_{i,4}} + 11\sum_{i=1}^6{t_{i,5}} + 9\sum_{i=1}^6{t_{i,6}} + 3\sum_{i=1}^6{t_{i,7}}
+        \label{eqP}
+        \end{equation}
+
+        Let $S$ be the total holding cost, then we have the following equation.
+        \begin{equation}
+        S = 0.5 \sum_{i=1}^6 \sum_{j=1}^7 y_{i,j}
+        \end{equation}
+
+        Therefore, the total net profit $W = P - S$, and our goal is to maximize $W$.
+
+        I have implemented this Linear Programming problem solver in IBM ILOG CPLEX Optimization Studio, and the project of solver is in the ``solver'' folder.
+    \item Use the solver to solve the problems and we can get the answers of the problems:
+
+		\begin{enumerate}
+			\item
+			The machine maintenance table is as follows.
+    	\begin{table}[htbp]
+    		\scriptsize
+    		\centering
+    		\renewcommand\arraystretch{1.1}
+    		\begin{tabular}{m{0.1\textwidth} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering}}
+    			\hline
+    			& \textbf{Number of Machine 1 in Maintenance} & \textbf{Number of Machine 2 in Maintenance} & \textbf{Number of Machine 3 in Maintenance} & \textbf{Number of Machine 4 in Maintenance} & \textbf{Number of Machine 5 in Maintenance} \\\hline
+    			January & $0$ & $0$ & $1$ & $0$ & $1$ \\
+    			February & $1$ & $0$ & $1$ & $0$ & $0$ \\
+    			March & $1$ & $0$ & $0$ & $0$ & $0$ \\
+    			April & $0$ & $2$ & $0$ & $1$ & $1$ \\
+    			May & $2$ & $0$ & $1$ & $0$ & $0$ \\
+    			June & $0$ & $0$ & $0$ & $0$ & $0$ \\
+    			\hline
+    		\end{tabular}
+    	\end{table}  			
+			\item
+			For each product:
+			\begin{enumerate}
+				\item
+				The table of amount to make in each month is as follows.
+    	\begin{table}[htbp]
+    		\scriptsize
+    		\centering
+    		\renewcommand\arraystretch{1.1}
+    		\begin{tabular}{m{0.1\textwidth} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering}}
+    			\hline
+    			& \textbf{Amount of Newly-Produced PROD 1} & \textbf{Amount of Newly-Produced PROD 2} & \textbf{Amount of Newly-Produced PROD 3} & \textbf{Amount of Newly-Produced PROD 4} & \textbf{Amount of Newly-Produced PROD 5} & \textbf{Amount of Newly-Produced PROD 6} &  \textbf{Amount of Newly-Produced PROD 7} \\\hline
+    			January & $500$	& $1000$ & $300$ & $300$ & $800$ & $200$ & $100$ \\
+                February & $600$ & $500$ & $200$ & $0$	& $400$	& $300$ & $150$ \\
+                March & $400$ & $700$ & $0$	& $100$ & $600$	& $400$	& $200$ \\
+                April & $0$ & $0$ & $400$ & $0$ & $0$ & $0$ & $0$ \\
+                May & $0$ & $100$ & $500$ & $100$ & $1000$ & $300$ & $0$ \\
+                June & $550$ & $550$ & $150$ & $350$ & $1150$ & $550$ & $110$ \\
+    			\hline
+    		\end{tabular}
+    	\end{table}
+				\item
+				The table of amount to sell in each month is as follows.
+        \begin{table}[htbp]
+    		\scriptsize
+    		\centering
+    		\renewcommand\arraystretch{1.1}
+    		\begin{tabular}{m{0.1\textwidth} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering}}
+    			\hline
+    			& \textbf{Amount of PROD 1 on Market} & \textbf{Amount of PROD 2 on Market} & \textbf{Amount of PROD 3 on Market} & \textbf{Amount of PROD 4 on Market} & \textbf{Amount of PROD 5 on Market} & \textbf{Amount of PROD 6 on Market} &  \textbf{Amount of PROD 7 on Market} \\\hline
+    			January & $500$	& $1000$ & $300$ & $300$ & $800$ & $200$ & $100$ \\
+                February & $600$ & $500$ & $200$ & $0$ & $400$ & $300$ & $150$ \\
+                March & $300$ & $600$ & $0$ & $0$ & $500$ & $400$ & $100$ \\
+                April & $100$ & $100$ & $400$ & $100$ & $100$ & $0$ & $100$ \\
+                May & $0$ & $100$ & $500$ & $100$ & $1000$ & $300$ & $0$ \\
+                June & $500$ & $500$ & $100$ & $300$ & $1100$ & $500$ & $60$ \\
+    			\hline
+    		\end{tabular}
+    	\end{table}
+				\item
+				The table of amount to hold at the end of each month is as follows.
+        \begin{table}[htbp]
+    		\scriptsize
+    		\centering
+    		\renewcommand\arraystretch{1.1}
+    		\begin{tabular}{m{0.1\textwidth} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering} m{0.1\textwidth}<{\centering}}
+    			\hline
+    			& \textbf{Amount of Stocks of PROD 1} & \textbf{Amount of Stocks of PROD 2} & \textbf{Amount of Stocks of PROD 3} & \textbf{Amount of Stocks of PROD 4} & \textbf{Amount of Stocks of PROD 5} & \textbf{Amount of Stocks of PROD 6} &  \textbf{Amount of Stocks of PROD 7} \\\hline
+    			At the end of January & $0$ & $0$ & $0$ & $0$ & $0$ & $0$ & $0$ \\
+    			At the end of February & $0$ & $0$ & $0$ & $0$ & $0$ & $0$ & $0$ \\
+    			At the end of March & $100$ & $100$ & $0$ & $100$ & $100$ & $0$ & $100$ \\
+    			At the end of April & $0$ & $0$ & $0$ & $0$ & $0$ & $0$ & $0$ \\
+    			At the end of May & $0$ & $0$ & $0$ & $0$ & $0$ & $0$ & $0$ \\
+    			At the end of June & $50$ & $50$ & $50$ & $50$ & $50$ & $50$ & $50$ \\
+    			\hline
+    		\end{tabular}
+    	\end{table}
+			\end{enumerate}
+			\item
+			The total selling profit: $P = \pounds 111730$.
+			\item
+			The total holding cost: $S = \pounds 425$.
+			\item
+			The total net profit (selling profit minus holding cost): $W = P - S = \pounds 111305$.
+		\end{enumerate}
+    \end{enumerate}
+	\end{solution}
+\end{enumerate}
+
+
+
+\textbf{Remark:} Include your .pdf, .tex, .oplproject, .project, .mod and .dat files for uploading.
+
+
+%========================================================================
+\end{document}

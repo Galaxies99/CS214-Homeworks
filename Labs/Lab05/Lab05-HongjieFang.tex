@@ -1,0 +1,195 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{ctex}
+\usepackage{amsmath,amscd,amsbsy,amssymb,latexsym,url,bm,amsthm}
+\usepackage{epsfig,graphicx,subfigure}
+\usepackage{enumitem,balance}
+\usepackage{wrapfig}
+\usepackage{mathrsfs,euscript}
+\usepackage[usenames]{xcolor}
+\usepackage{hyperref}
+\usepackage[vlined,ruled,linesnumbered]{algorithm2e}
+\hypersetup{colorlinks=true,linkcolor=black}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{exercise}{Exercise}
+\newtheorem*{solution}{Solution}
+\newtheorem{definition}{Definition}
+\theoremstyle{definition}
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\newcommand{\postscript}[2]
+ {\setlength{\epsfxsize}{#2\hsize}
+  \centerline{\epsfbox{#1}}}
+
+\renewcommand{\baselinestretch}{1.0}
+
+\setlength{\oddsidemargin}{-0.365in}
+\setlength{\evensidemargin}{-0.365in}
+\setlength{\topmargin}{-0.3in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\textheight}{10.1in}
+\setlength{\textwidth}{7in}
+\makeatletter \renewenvironment{proof}[1][Proof] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+\makeatletter
+\renewenvironment{solution}[1][Solution] {\par\pushQED{\qed}\normalfont\topsep6\p@\@plus6\p@\relax\trivlist\item[\hskip\labelsep\bfseries#1\@addpunct{.}]\ignorespaces}{\popQED\endtrivlist\@endpefalse} \makeatother
+
+\begin{document}
+\noindent
+
+%========================================================================
+\noindent\framebox[\linewidth]{\shortstack[c]{
+\Large{\textbf{Lab05-DynamicProgramming}}\vspace{1mm}\\
+CS214-Algorithm and Complexity, Xiaofeng Gao, Spring 2020.}}
+\begin{center}
+\footnotesize{\color{red}$*$ If there is any problem, please contact TA Shuodian Yu.}
+
+% Please write down your name, student id and email.
+\footnotesize{\color{blue}$*$ Name:Hongjie Fang  \quad Student ID:518030910150 \quad Email: galaxies@sjtu.edu.cn}
+\end{center}
+
+\begin{enumerate}
+    \item
+    \textbf{Bookshelf: }Tim has $n$ books and he wants to make a bookshelf to them. The pages' width of the $i$-th book is $w_i$ and the thickness is $t_i$.
+
+    Tim puts the books on the bookshelf in the following way. He selects some books and put them vertically. Then the rest of the books are put horizontally above the vertical books. Obviously, the total thickness of the books put vertically must be greater than the sum of widths of the horizontal books. As long as tim wants to make the bookshelf as small as possible, please help him to find the minimum total thickness of the vertical books.
+
+    To simplify the problem, the thickness of each book is either $1$ or $2$. And all the numbers in this problem are positive integers.
+
+    Design an algorithm based on dynamic programming and implement it in C/C++/Python. The file \texttt{Data-P1.txt} is a test case, where the first line contains an integer $n$. Each of the next $n$ lines contains two integers $t_i$ and $w_i$ denoting two attributes of the $i$-th book. Source code should be named as
+    {\color{red}\emph{Code-P1.*}} .You need to briefly describe your algorithm and find the result of \texttt{Data-P1.txt} by your program.
+
+    \textbf{Example:}
+
+    Given $n=5$ books, and $\{(t_i,w_i)|1\leq i \leq 5\} = \{(1,12),(1,3),(2,15),(2,5),(2,1)\}$. The algorithm should return $5$.
+
+    \begin{solution}
+        Let $f(i,j)$ denote the minimum total thickness of the vertical books when we only consider about the first $i$ books (book $1$ to book $i$) and we can still put some horizontal books of total width $j$ (When $j < 0$ it means we need to add horizontal books of total width $j$ in the future). We assume that if the feasible solution does not exist under a certain previous restriction $i$ and $j$, then $f(i,j) = +\infty$. Notice that the thickness of each book does not exceed $2$, so the total thickness cannot exceed $2n$ in any time. Therefore, we have $-2n \leq j \leq 2n$. Hence, the \textbf{optimal substructure} is:
+        \begin{itemize}
+        \item If OPT puts book $i$ in the vertical position, then
+            \begin{itemize}
+            \item Book $i$ contributes $t_i$ to the total thickness;
+            \item Argument $j$ must satisfy $j - t_i \ge -2n$ owing to the previous restriction to $j$.
+            \item OPT must includes the optimal solution when we only consider about the first $(i-1)$ books and we can still put some horizontal books of total width $(j - t_i)$.
+            \end{itemize}
+        \item If OPT puts book $i$ in the vertical position, then:
+            \begin{itemize}
+            \item Book $i$ does not contribute to the total thickness;
+            \item Argument $j$ must satisfy $j + w_i \leq 2n$ owing to the previous restriction to $j$;
+            \item OPT must includes the optimal solution when we only consider about the first $(i-1)$ books and we can still put some horizontal books of total width $(j + w_i)$.
+            \end{itemize}
+        \end{itemize}
+        Therefore, the \textbf{recurrence} is as follows:
+        \begin{displaymath}
+        f(i,j) = \left\{
+        \begin{aligned}
+        & 0 & \quad & (i = 0, j = 0) \\
+        & f(i-1, j + w_i) & \quad & (i \geq 1, j - t_i < -2n, j + w_i \leq 2n) \\
+        & f(i-1, j - t_i) + t_i & \quad  & (i \geq 1, j - t_i \geq -2n, j + w_i > 2n) \\
+        & \min(f(i-1, j - t_i) + t_i, f(i-1, j + w_i)) & \quad & (i \geq 1, j - t_i \geq -2n, j + w_i \leq 2n) \\
+        & +\infty & \quad & (otherwise)
+        \end{aligned}
+        \right.
+        \end{displaymath}
+
+        Thus, the minimum total thickness of the vertical books under the restriction above is
+        \begin{displaymath}
+        \min_{j \in [0, 2n]}\{f(n,j)\}
+        \end{displaymath}
+
+        Here is the pseudo-code of the algorithm (Alg.~\ref{alg1}).
+
+        \begin{minipage}[t]{0.8\textwidth}
+        \begin{algorithm}[H]
+            \KwIn{Total number of books $n$; two attributes $t_i, w_i$ of the $i$-th book.}
+            \KwOut{Minimum total thickness of the vertical books under the restriction above.}
+
+            \BlankLine
+            \caption{Bookshelf Problem - Dynamic Programming Solution}
+            \label{alg1}
+            \For{$i = 0$ \textbf{to} $n$} {
+                \For{$j = -2n$ \textbf{to} $2n$} {
+                    $f[0, j] \leftarrow +\infty$;
+                }
+            }
+            $f[0, 0] \leftarrow 0$;
+
+            \For{$i=1$ \textbf{to} $n$} {
+                \For{$j=-2n$ \textbf{to} $2n$} {
+                    \If{$j - t_i \geq -2n$} {
+                        $f[i, j] \leftarrow \min(f[i, j], f[i-1, j-t_i] + t_i)$;
+                    }
+                    \If{$j + w_i \leq 2n$} {
+                        $f[i, j] \leftarrow \min(f[i, j], f[i-1, j + w_i])$;
+                    }
+                }
+            }
+
+            $ans \leftarrow +\infty$;
+
+            \For{$j=0$ \textbf{to} $2n$} {
+                $ans \leftarrow \min(ans, f[n,j])$;
+            }
+
+            \Return{$ans$};
+        \end{algorithm}
+        \end{minipage}
+
+        The C++ implementation of the algorithm is in the \href{code/Code-P1.cpp}{Code-P1.cpp} in the code directory.
+
+        Run the program and we can get the result of Data-P1.txt is $2542$, that is, the minimum total thickness of the vertical books in Data-P1.txt is $2542$.
+    \end{solution}
+    \clearpage
+
+    \item
+    Recall the \emph{String Similarity} problem in class, in which we calculate the edit distance between two strings in a sequence alignment manner.
+
+    You are to find the lowest aligning cost between 2 DNA sequences, in which the cost matrix is defined as
+
+    \begin{center}
+        \begin{tabular}{|c||c|c|c|c|c|}
+        \hline
+          & - & A & T & G & C \\
+        \hline
+        - & 0 & 1 & 2 & 1 & 3 \\
+        A & 1 & 0 & 1 & 5 & 1 \\
+        T & 2 & 1 & 0 & 9 & 1 \\
+        G & 1 & 5 & 9 & 0 & 1 \\
+        C & 3 & 1 & 1 & 1 & 0 \\
+        \hline
+        \end{tabular}
+    \end{center}
+
+    where \texttt{(-, A)} means adding (or removing) one \texttt{A}, etc.
+
+    \begin{enumerate}
+        \item
+        Implement Hirschberg's algorithm with C/C++/Python. Please attach your source code named as {\color{red}\emph{Code-P2.*}}. Your program will be tested against random inputs. Your program should be able to output two sequences after editing.
+
+        \item
+        Using your program, find the edit distance between the two DNA sequences found in attachments \texttt{Data-P2a.txt} and \texttt{Data-P2b.txt}.
+    \end{enumerate}
+    \begin{solution}
+        The C++ implementation of the Hirschberg's algorithm is in the \href{code/Code-P2.cpp}{Code-P2.cpp} in the code directory. Here are some explanations.
+        \begin{itemize}
+        \item \textbf{(Small Data)} If you want to test program on small data using command prompt and manual input, then you can uncomment \texttt{\#define TEST\_SMALL\_DATA} in line 101, compile and execute the program to test manually.
+        \item \textbf{(Big Data)} If you want to test program on big data using file input, then you can comment \texttt{\#define TEST\_SMALL\_DATA} in line 101, change line 109 and line 112 to the correct file directory, compile and execute the program to test automatically. \textbf{\color{purple} The output of the program will be saved as a file named \texttt{result.res} in the current directory. You can open it and check the answer.}
+        \item \textbf{(Output Cost)} If you want to output the minimum cost, then you can uncomment \texttt{\#define OUTPUT\_COST} in line 157, compile and execute the program to get the minimum cost in output.
+        \item \textbf{(Output Answer)} If you want to output the answer (How to modify the sequences), you can uncomment \texttt{\#define OUTPUT\_ANSWER} in line 158, compile and execute the program to get the modification sequences. \textbf{\color{purple} The program will output two aligned sequences using ``\texttt{\_}'' (the underline notation) to represent insertion of the sequences. Matching these two sequences in this way can minimize the total cost.}
+        \end{itemize}
+
+        We use the \textbf{Big Data} mode mentioned above and output both cost and answer to get the edit distance between \texttt{Data-P2a.txt} and \texttt{Data-P2b.txt}. The result is in the \href{code/result.res}{result.res} in the code directory. The minimum cost to aligning these two sequences is $7615$, and the aligning method is in the output file of the program.
+    \end{solution}
+
+\end{enumerate}
+
+\vspace{20pt}
+
+\textbf{Remark:} You need to include your .pdf and .tex and {\color{red}\emph{$2$}} source code files in your uploaded .rar or .zip file.
+
+%========================================================================
+\end{document}

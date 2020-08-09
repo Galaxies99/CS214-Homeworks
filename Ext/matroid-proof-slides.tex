@@ -1,0 +1,165 @@
+\documentclass[notheorems]{beamer}
+\usepackage{latexsym}
+\usepackage{amsmath,amssymb}
+\usepackage{color,xcolor}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{amsthm}
+
+\usetheme{Madrid}
+\usefonttheme[onlymath]{serif}
+\usecolortheme{rose}
+
+\setbeamertemplate{theorems}[numbered]
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{exercise}{Exercise}
+\newtheorem*{solution}{Solution}
+\newtheorem{definition}{Definition}
+
+\begin{document}
+
+\title[The Proof of Disjoint Path Matroid]{The Proof of Disjoint Path Matroid}
+\author[Hongjie Fang]{Hongjie Fang}
+\institute[CSE, SJTU] {Computer Science and Engineering Department, Shanghai Jiao Tong University}
+\date[\today]{\today}
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Disjoint Path Matroid}
+The definition of the Disjoint Path Matroid is as follows.
+\begin{definition}[Disjoint Path Matroid]
+Let $G = (V,E)$ be an arbitrary directed graph, and let $s$ be a fixed vertex of $G$. A subset $I \subseteq V$ is independent if and only if there are edge-disjoint paths from $s$ to each vertex in $I$. Let $\mathbf{C}$ be the collection of independent subsets of $V$, then $M = (V, \mathbf{C})$ is a Disjoint Path Matroid.
+\end{definition}
+And we want to prove that $M$ is indeed a matroid.
+\end{frame}
+
+\begin{frame}
+\frametitle{Hereditary}
+\begin{lemma}[Hereditary]
+The collection $\mathbf{C}$ is hereditary.
+\end{lemma}
+\begin{proof}
+$\forall B \in \mathbf{C}$, $B$ is independent, that is, there are edge-disjoint paths from $s$ to each vertex in $B$. $\forall A \subseteq B$, then there are edge-disjoint paths from $s$ to each vertex in $A$, since the vertex in $A$ must be in $B$. Hence, $A \in \mathbf{C}$.
+Therefore, the collection $\mathbf{C}$ is hereditary.
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{Overlapped Path}
+Assume that
+\begin{itemize}
+  \item All lemmas and definitions are under the condition of a given graph $G=(V,E)$;
+  \item A path $P$ consists of the edges in path, so $P$ is a subset of $E$;
+  \item $dst(P)$ stands for the destination of the path $P$.
+\end{itemize}
+\pause
+Before we prove the exchange property of $M$, I would like to propose the following useful definitions and lemmas.
+\begin{definition}[Overlapped Path]
+Two paths $P_1, P_2$ is overlapped if and only if there exists an edge $e \in E$ satisfying $e \in P_1$ and $e \in P_2$ (i.e., $P_1 \cap P_2 \ne \varnothing$).
+\end{definition}
+\end{frame}
+
+\begin{frame}
+\frametitle{Construction Lemma}
+\begin{lemma}[Construction Lemma]
+Suppose $A \in \mathbf{C}, B \in \mathbf{C}$, and $m = |A| < |B| = n$. According to the definition of $\mathbf{C}$, there exist $m$ non-overlapped paths with the destinations of every vertex in $A$, say $\mathbf{P} = \{P_1, P_2, ..., P_m\}$. Similarly, there also exist $n$ non-overlapped paths with the destinations of every vertex in $B$, say $\mathbf{Q} = \{Q_1, Q_2, ..., Q_n\}$. Then we are able to construct a non-overlapped path set $\mathbf{R} = \{R_1, R_2, ..., R_n\}$ satisfying
+\begin{displaymath}
+A \subseteq \{dst(R_i) \mid i = 1,2,...,n\}
+\end{displaymath}
+\end{lemma}
+\end{frame}
+
+\begin{frame}
+\frametitle{Proof of Construction Lemma}
+\begin{itemize}
+\item Initially, we set $\mathbf{R}_0 = \mathbf{Q}$. Then we prove that after $c$ steps ($c \in \mathbb{R}$), $\mathbf{R}_c$ meets the requirement $A \subseteq \{dst(R) \mid R \in \mathbf{R}_c\}$.
+\pause
+\item In every step, we will maintain the {\color{blue}property} that each path in $\mathbf{R}_i$ is not overlapped with other paths in $\mathbf{R}_i$.
+\pause
+\item First, we give the following process of every step, and try to prove that if the process ends, then it will give the correct answer to the problem.
+\item In $i$-th step, we will check that whether $\mathbf{R}_i$ meets the requirement $A \subseteq \{dst(R) \mid R \in \mathbf{R}_i\}$ first.
+\item If the answer is true, then let $c = i$, we prove that $\mathbf{R}_c$ meets the requirement above.
+\item If the answer is false, then there exists $P \in \mathbf{P}$ satisfying $dst(P) \notin \{dst(R) \mid R \in \mathbf{R}_i\}$. We will discuss this case in next slide.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Proof of Construction Lemma (Cont.)}
+\begin{itemize}
+\item We divided it into two cases, according to the situation of $P$.
+\pause
+\begin{itemize}
+\item {\color{red} Case 1} ($P$ is not overlapped with any paths in $\mathbf{R}_i$):
+
+Randomly choose a path in $\mathbf{R}_i$ called $R'$, which is not in $\mathbf{P}$ (there must exist because paths are distinct in $\mathbf{P}$ and $|\mathbf{P}| < |\mathbf{R}_i|$). Then $\mathbf{R}_{i+1} = \mathbf{R}_i - \{R'\} + \{P\}$ will maintain the {\color{blue}property} above, since every two paths in $\mathbf{R}_i$ do not have overlapped edge and $P$ is not overlapped with any paths in $\mathbf{R}_i$.
+\pause
+\item {\color{red} Case 2} ($P$ is overlapped with some paths in $\mathbf{R}_i$):
+
+Suppose the last overlapped edge in $P$ is $e$, and it is the overlapped edge between $P$ and $R'$, where $R' \in \mathbf{R}_i$. Then we construct a new path $P'$ by mainly copying path $R'$, except that after edge $e$ it follows path $P$. Therefore, the destination of $P'$ is the same as the destination of $P$, and $P'$ do not overlapped with any path in $\mathbf{R}_i - \{R'\}$. It's because the front part of $P'$ follows $R'$, which is not overlapped with any other paths in $\mathbf{R}_i$, and the last part of $P'$ follows path $P$ after edge $e$, which is not overlapped with any paths since $e$ is the last overlapped edge in $P$. Hence $\mathbf{R}_{i+1} = \mathbf{R}_i - \{R'\} + \{P'\}$ will maintain the {\color{blue}property} above.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Proof of Construction Lemma (Cont.)}
+\begin{itemize}
+\item In summary, we have proved that if the process ends successfully, it will give us the correct answer to the question.
+\pause
+\item Second, we prove that the process will end in finite steps.
+\pause
+\item Notice that when the first case happens, we substitutes an element in $\mathbf{R}$ with an element in $\mathbf{P}$ and keeps the elements in $\mathbf{R}$ distinct. And the second case won't change these elements in $\mathbf{P}$. Therefore, the first case happens at most $|\mathbf{P}| = m$ times.
+\pause
+\item Now let us consider the second case. Let $E_i$ be the \textbf{multi-set} (i.e. set that allows duplicate elements) of edges that have been operated after $i$-th second-case step. At first, we stipulate that $E_0 = \varnothing$. In $i$-th second-case step $(i\in\mathbb{N}^+)$, we set $e$ as a new operated edge, that is, $E_i = E_{i-1} + \{e\}$. Then it is obvious that $|E_i|$ is strictly increasing.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Proof of Construction Lemma (Cont.)}
+\begin{itemize}
+\item Notice that an edge can not be operated twice, that is, the multi-set $E_i$ is actually a set. In the second case, we set edge $e$ as operated edge and we know that $e \in \cup{\mathbf{P}}$ because of overlapping. After the setting, edge $e$ cannot be set as operated edge again because:
+    \begin{itemize}
+    \item Edge $e$ cannot be overlapped again by another path in $\mathbf{P} - \{P\}$, and for path $P$ we won't operate the $e$ again because $dst(R') \in A$;
+    \item If an edge $e'$ in path $R'$ before edge $e$ is operated in future, then $e$ will maintain the property that $e \in \cup\mathbf{P}$ and $e \in \cup\mathbf{Q}$, which will ensure that it won't be operated again.
+    \end{itemize}
+\pause
+\item Since the process starts with an empty set $E_0 = \varnothing$ and only involves edges in a finite set $\mathbf{E} \stackrel{\Delta}{=} (\cup{\mathbf{P}}) \cup (\cup{\mathbf{Q}})$, the second case happens at most $|\mathbf{E}|$ times.
+\item Therefore, the whole process will end in at most $(|\mathbf{E}| + m)$ steps. Thus, the lemma is proved. QED.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Exchange Property}
+\begin{lemma}[Exchange Property]
+The independent system $M = (V, \mathbf{C})$ satisfies the exchange property.
+\end{lemma}
+\begin{proof}
+$\forall A\in \mathbf{C}, \forall B\in \mathbf{C}$ and $|A| < |B|$, with the Construction Lemma, we can construct a path set $\mathbf{R}$ satisfying
+\begin{displaymath}
+A \subseteq \{dst(R) \mid R \in \mathbf{R}\}
+\end{displaymath}
+Thus, it's easy to choose $(|A| + 1)$ paths in $\mathbf{R}$ and keep the property above, and we suppose these paths form path set $\mathbf{R}'$. Then, we construct the set $C$ as follows.
+\begin{displaymath}
+C = \{dst(R) \mid R \in \mathbf{R}'\}
+\end{displaymath}
+It's easy to see that $A \subseteq C$ and $C \in \mathbf{C}$. Thus the exchange property is proved.
+\end{proof}
+\end{frame}
+
+\begin{frame}
+\frametitle{Final: Matroid}
+\begin{theorem}
+Disjoint Path Matroid $M$ is indeed a matroid.
+\end{theorem}
+\begin{proof}
+According to the Lemma Hereditary and Lemma Exchange Property, the theorem is proved.
+\end{proof}
+\end{frame}
+
+\end{document}
